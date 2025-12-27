@@ -5,6 +5,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-SDL_Texture * getTextureFromImage(const char * nomPic, SDL_Renderer * renderer);
+SDL_Texture *getTextureFromImage(const char *nomPic, SDL_Renderer *renderer);
 
 #endif
