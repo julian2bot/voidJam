@@ -6,9 +6,14 @@
 #include <SDL_image.h>
 #include <time.h>
 #include <SDL_ttf.h>
+#include "player.h"
+#include "map.h"
+#include "gestionSDL.h"
 
-#define tailleFenetreH		800
-#define tailleFenetreW	1200 
+#define tailleFenetreH 600
+#define tailleFenetreW 1000
+
+
 
 // Creation de la fenetre et du canvas de la fenetre
 int init(SDL_Window ** mafenetre, SDL_Renderer * canvas, SDL_Renderer ** renderer)
@@ -21,20 +26,7 @@ int init(SDL_Window ** mafenetre, SDL_Renderer * canvas, SDL_Renderer ** rendere
 	return res;
 }
 
-SDL_Texture * getTextureFromImage(const char * nomPic, SDL_Renderer * renderer)
-{
-	SDL_Surface * image = IMG_Load(nomPic);
-	if(!image)
-	{
-		printf("Erreur de chargement de l'image : %s",SDL_GetError());
-		return NULL;
-	}
-	
-	SDL_Texture * texSprite=SDL_CreateTextureFromSurface(renderer, image);
-	SDL_FreeSurface(image);
 
-	return texSprite;
-}
 
 
 int main(int argc, char *argv[])
@@ -44,14 +36,15 @@ int main(int argc, char *argv[])
 	SDL_Renderer * renderer;		// Canvas
 
     TTF_Init();
-	 
-		
+
 	init(&mafenetre,renderer,&renderer);
-	
+
+	Player player = initPlayer(renderer);
 
 	int fin = 0;
  	while (!fin) 
 	{
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);   // fond noir
  		SDL_RenderClear(renderer);
 		
 		// Boucle principale
@@ -70,7 +63,15 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 
+		for (int i = 0; i < road_count ; i++)
+		{
+			SDL_RenderFillRect(renderer, &roads[i]);
+		}
+
+
+		drawPlayer(renderer, player);
 		SDL_RenderPresent(renderer);
 	}
 	
