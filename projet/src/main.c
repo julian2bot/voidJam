@@ -10,6 +10,7 @@
 #include "map.h"
 #include "gestionSDL.h"
 #include "effects.h"
+#include "camera.h"
 
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
@@ -40,6 +41,8 @@ int main(int argc, char *argv[])
 	EffectManager effects = initEffects(renderer);
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
+	Camera camera = CreateCamera(createVector(player.pos.x, player.pos.y), player.angle, 60);
+
 	int fin = 0;
 	while (!fin)
 	{
@@ -69,7 +72,9 @@ int main(int argc, char *argv[])
 
 		drawWalls(renderer, walls, wall_count);
 		movePlayer(&player);
+		UpdateCameraPlayer(&camera, &player);
 		drawPlayer(renderer, player);
+		CheckRays(&camera, 10, 5, walls, wall_count, renderer);
 		updateEffects(&effects); // Update animations
 		drawEffects(&effects, renderer); // Draw them
 		SDL_RenderPresent(renderer);
