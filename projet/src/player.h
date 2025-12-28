@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <math.h>
 #include "gestionSDL.h"
+#include "effects.h"
 #define DEG2RAD (M_PI / 180.0f)
 #define SPEED_MIN 0.4f
 #define SPEED_MAX 2.0f
@@ -27,6 +28,8 @@ Player initPlayer(SDL_Renderer *renderer);
 void drawPlayer(SDL_Renderer *renderer, Player player);
 void movePlayer(Player *player);
 void destroyPlayer(Player p);
-void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back);
+void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects);
+int collision(Player *player, SDL_Rect *walls, int wall_count);
+void gameOver(Player *player);
 
 #endif

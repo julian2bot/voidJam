@@ -3,9 +3,9 @@
 
 #include <SDL.h>
 
-extern SDL_Rect roads[];
-extern int road_count;
+extern SDL_Rect walls[];
+extern int wall_count;
 
-void drawRoads(SDL_Renderer *renderer, SDL_Rect *roads, int road_count);
+void drawWalls(SDL_Renderer *renderer, SDL_Rect *walls, int wall_count);
 
 #endif

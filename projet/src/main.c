@@ -9,6 +9,7 @@
 #include "player.h"
 #include "map.h"
 #include "gestionSDL.h"
+#include "effects.h"
 
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
 	init(&mafenetre, renderer, &renderer);
 
 	Player player = initPlayer(renderer);
+	EffectManager effects = initEffects(renderer);
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
 	int fin = 0;
@@ -45,7 +47,7 @@ int main(int argc, char *argv[])
 		SDL_RenderClear(renderer);
 
 		
-		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S]);
+		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects);
 
 		// Boucle principale
 		if (SDL_PollEvent(&event))
@@ -58,26 +60,24 @@ int main(int argc, char *argv[])
 
 			case SDL_KEYDOWN:
 				printf("touche %c\n", event.key.keysym.sym);
-				// if (event.key.keysym.sym == SDLK_z) player.vitesse +=0.08; 
-				// if (event.key.keysym.sym == SDLK_s) player.vitesse -=0.08; 
-				// if (event.key.keysym.sym == SDLK_d) player.angle +=1.5; 
-				// if (event.key.keysym.sym == SDLK_q) player.angle -=1.5; 
-				if (event.key.keysym.sym == SDLK_ESCAPE)
-					fin = 1;
+				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
 				break;
 			}
 		}
 
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 
-		drawRoads(renderer, roads, road_count);
+		drawWalls(renderer, walls, wall_count);
 		movePlayer(&player);
 		drawPlayer(renderer, player);
+		updateEffects(&effects); // Update animations
+		drawEffects(&effects, renderer); // Draw them
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16);
 	}
 	
 	destroyPlayer(player);
+	destroyEffects(&effects);
 	
 	SDL_DestroyWindow(mafenetre);
 	TTF_Quit();

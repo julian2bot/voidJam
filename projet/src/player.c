@@ -36,14 +36,25 @@ void movePlayer(Player *player)
 }
 
 void updatePlayer(Player *player, int turnLeft, int turnRight,
-                  int forward, int back)
+                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects)
 {
-    // Rotation
+	
+	if(collision(player, walls, wall_count))
+	{
+		if (player->vitesse > 0) { // Only explode if moving
+			// Center of the player
+			// addExplosion(effects, player->position.x + player->position.w / 2, player->position.y + player->position.h / 2);
+			printf("Collision\n");
+			gameOver(player);
+		}
+	}
+
+	// Rotation
     if (turnLeft)
-        player->angle -= TURN_RATE;
+        player->angle += TURN_RATE;
 
     if (turnRight)
-        player->angle += TURN_RATE;
+        player->angle -= TURN_RATE;
 
     // Accélération progressive (courbe)
     if (forward)
@@ -73,6 +84,22 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
     movePlayer(player);
 }
 
+int collision(Player *player, SDL_Rect *walls, int wall_count)
+{
+	for (int i = 0; i < wall_count; i++)
+	{
+		if (SDL_HasIntersection(&player->position, &walls[i]))
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+void gameOver(Player *player)
+{
+	player->vitesse = 0;
+	
+}
 void destroyPlayer(Player p)
 {
 	destroy_textures(1, p.texture);
