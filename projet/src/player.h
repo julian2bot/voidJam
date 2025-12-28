@@ -29,7 +29,7 @@ void drawPlayer(SDL_Renderer *renderer, Player player);
 void movePlayer(Player *player);
 void destroyPlayer(Player p);
 void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects);
-int collision(Player *player, SDL_Rect *walls, int wall_count);
+int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *intersection);
 void gameOver(Player *player);
 
 #endif

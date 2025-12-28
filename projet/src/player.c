@@ -2,7 +2,7 @@
 
 Player initPlayer(SDL_Renderer *renderer)
 {
-	SDL_Rect position = {10, 10, 30, 20};
+	SDL_Rect position = {100, 100, 30, 20};
 	SDL_FPoint point = {position.x, position.y};
 	Player player = {point, position, 90, NULL, .4};
 
@@ -39,14 +39,13 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
                   int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects)
 {
 	
-	if(collision(player, walls, wall_count))
+	SDL_Rect intersect;
+	if(collision(player, walls, wall_count, &intersect))
 	{
-		if (player->vitesse > 0) { // Only explode if moving
-			// Center of the player
-			// addExplosion(effects, player->position.x + player->position.w / 2, player->position.y + player->position.h / 2);
-			printf("Collision\n");
-			gameOver(player);
-		}
+		if(player->vitesse > 0) addExplosion(effects, intersect.x + intersect.w / 2, intersect.y + intersect.h / 2);
+		printf("Collision\n");
+		gameOver(player);
+		return;
 	}
 
 	// Rotation
@@ -84,11 +83,11 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
     movePlayer(player);
 }
 
-int collision(Player *player, SDL_Rect *walls, int wall_count)
+int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *intersection)
 {
 	for (int i = 0; i < wall_count; i++)
 	{
-		if (SDL_HasIntersection(&player->position, &walls[i]))
+		if (SDL_IntersectRect(&player->position, &walls[i], intersection))
 		{
 			return 1;
 		}
