@@ -36,12 +36,16 @@ int main(int argc, char *argv[])
 	init(&mafenetre, renderer, &renderer);
 
 	Player player = initPlayer(renderer);
+	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
 	int fin = 0;
 	while (!fin)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // fond noir
 		SDL_RenderClear(renderer);
+
+		
+		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S]);
 
 		// Boucle principale
 		if (SDL_PollEvent(&event))
@@ -54,6 +58,10 @@ int main(int argc, char *argv[])
 
 			case SDL_KEYDOWN:
 				printf("touche %c\n", event.key.keysym.sym);
+				// if (event.key.keysym.sym == SDLK_z) player.vitesse +=0.08; 
+				// if (event.key.keysym.sym == SDLK_s) player.vitesse -=0.08; 
+				// if (event.key.keysym.sym == SDLK_d) player.angle +=1.5; 
+				// if (event.key.keysym.sym == SDLK_q) player.angle -=1.5; 
 				if (event.key.keysym.sym == SDLK_ESCAPE)
 					fin = 1;
 				break;
@@ -63,10 +71,14 @@ int main(int argc, char *argv[])
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 
 		drawRoads(renderer, roads, road_count);
+		movePlayer(&player);
 		drawPlayer(renderer, player);
 		SDL_RenderPresent(renderer);
+		SDL_Delay(16);
 	}
-
+	
+	destroyPlayer(player);
+	
 	SDL_DestroyWindow(mafenetre);
 	TTF_Quit();
 	SDL_Quit();

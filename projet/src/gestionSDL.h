@@ -6,5 +6,6 @@
 #include <SDL_image.h>
 
 SDL_Texture *getTextureFromImage(const char *nomPic, SDL_Renderer *renderer);
+void destroy_textures(unsigned int nb_textures, ...);
 
 #endif
