@@ -9,15 +9,8 @@ EffectManager initEffects(SDL_Renderer *renderer)
     if (manager.explosionTexture) {
         int w, h;
         SDL_QueryTexture(manager.explosionTexture, NULL, NULL, &w, &h);
-        // Assuming 1 row of 5 frames
-        manager.frameWidth = w / EXPLOSION_FRAMES; // 5 frames horizontal ? Or vertical?
-        // Let's assume vertical if the image looked vertical. 
-        // But prompt said horizontal. I'll assume horizontal 5 frames unless it looks weird.
-        // If image is 1024x1024, and 5 frames, maybe it's not a strip but a sheet?
-        // I'll assume a vertical strip for safety if the user saw a "column". 
-        // Let's default to VERTICAL STRIP based on my experience with "explosion" gens often stacking.
-        // Wait, I will use a logic that tries to guess or just stick to one.
-        // Let's assume VERTICAL strip (1 column, 5 rows).
+        manager.frameWidth = w / EXPLOSION_FRAMES;
+ 
         manager.frameWidth = w;
         manager.frameHeight = h / EXPLOSION_FRAMES;
     } else {

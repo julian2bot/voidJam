@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // fond noir
 		SDL_RenderClear(renderer);
 
-		
 		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects);
+
 
 		// Boucle principale
 		if (SDL_PollEvent(&event))
@@ -78,12 +78,13 @@ int main(int argc, char *argv[])
 		player.fatigue -=.001;
 
 		drawWalls(renderer, walls, wall_count);
+		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effects);
 
-		drawCockPit(renderer, player, &playerUI);
 		movePlayer(&player);
 		drawPlayer(renderer, player);
 		updateEffects(&effects); // Update animations
 		drawEffects(&effects, renderer); // Draw them
+		
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16);
 	}

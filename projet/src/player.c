@@ -1,10 +1,11 @@
 #include "player.h"
+#include "minimap.h"
 
 Player initPlayer(SDL_Renderer *renderer)
 {
 	SDL_Rect position = {100, 100, 30, 20};
 	SDL_FPoint point = {position.x, position.y};
-	Player player = {point, position, 90, NULL, .4, FATIGUE_MAX};
+	Player player = {point, position, 90, NULL, .4, FATIGUE_MAX, 0};
 
 	SDL_Texture *rectTexture = getTextureFromImage("voiture.png", renderer);
 
@@ -92,6 +93,7 @@ int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *interse
 void gameOver(Player *player)
 {
 	player->vitesse = 0;
+	player->tesMort = 1;
 }
 
 void destroyPlayer(Player p)
@@ -101,14 +103,14 @@ void destroyPlayer(Player p)
 
 
 // Dashboard
-void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI)
+void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects)
 {
     drawDashboard(renderer);
     drawSpeedGauge(renderer, player);
     drawFatigueGauge(renderer, player);
     drawSteeringWheel(renderer, player);
 	drawMusicPlayer(renderer, playerUI);
-
+	drawMinimap(renderer, player, walls, wallCount, effects);
 }
 
 void drawSteeringWheel(SDL_Renderer *renderer, Player player)

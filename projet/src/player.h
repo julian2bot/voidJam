@@ -35,6 +35,7 @@ typedef struct player
     float fatigue;
     float wheelAngle;     // angle du volant
     float wheelVelocity;  // inertie du volant
+    int tesMort;
 } Player;
 
 Player initPlayer(SDL_Renderer *renderer);
@@ -44,7 +45,7 @@ void destroyPlayer(Player p);
 void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects);
 int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *intersection);
 void gameOver(Player *player);
-void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer *playerUI);
+void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer *playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects);
 
 //dash board
 static void drawSteeringWheel(SDL_Renderer *renderer, Player player);
