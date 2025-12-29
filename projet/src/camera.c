@@ -40,22 +40,22 @@ void UpdateCameraPlayer(Camera *camera, Player *player){
     UpdateRotation(camera, player->angle);
 }
 
-void CheckRays(Camera *camera, int raysNumber, int raysOffestNumber, SDL_Rect walls[], int wallNumber, SDL_Renderer *renderer){
-    
-
+void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallNumber, int screenW, int screenH, SDL_Renderer *renderer2D, SDL_Renderer *renderer3D){
     float angleX, angleY = 0;
     int startOffset = 50;
-
     float startAngle = camera->radiant - DEG2RAD(camera->fov/2);
-    float stepAngle = DEG2RAD(camera->fov/raysNumber);
 
     Vector2 end;
     Vector2 hit;
-    int hasHit = 0;
 
-    for(int r = 0; r<raysNumber; r++){
-        angleX = cosf(startAngle + stepAngle*(r+1));
-        angleY = sinf(startAngle + stepAngle*(r+1));
+    int hasHit = 0;
+    float colW = (float)screenW / camera->fov;
+    int thickness = (int)ceilf(colW);
+    float maxDist = startOffset * raysOffestNumber;
+
+    for(int r = 0; r<camera->fov; r++){
+        angleX = cosf(startAngle + DEG2RAD(1)*(r+1));
+        angleY = sinf(startAngle + DEG2RAD(1)*(r+1));
 
         for (int i = 0; i < raysOffestNumber; i++)
         {
@@ -73,19 +73,61 @@ void CheckRays(Camera *camera, int raysNumber, int raysOffestNumber, SDL_Rect wa
             }
             if (hasHit)
             {
-                printf("Distance %.2f\n", Distance(camera->position, end));
+                /* ---------- DISTANCE ---------- */
+                float disH = Distance(camera->position, end);
+
+                /* ---------- FIX FISHEYE ---------- */
+                float ca = camera->radiant - (startAngle + DEG2RAD(1) * (r + 1));
+
+                /* normalisation angle */
+                if (ca < 0) ca += 2 * M_PI;
+                if (ca > 2 * M_PI) ca -= 2 * M_PI;
+
+                // disH = disH * cosf(ca);
+
+                /* ---------- HAUTEUR DU MUR ---------- */
+                int lineH = (64*screenH) / disH;
+                if (lineH > screenH) lineH = screenH;
+
+                /* ---------- OFFSET VERTICAL ---------- */
+                int lineOff = (screenH / 2) - (lineH / 2);
+
+                /* ---------- POSITION X DU RAYON ---------- */
+                int wallX = (int)(r * colW);
+
+                /* ---------- COULEUR ---------- */
+                float shade = 1.0f - (disH / maxDist);
+
+                if (shade < 0.1f) shade = 0.1f;
+                if (shade > 1.0f) shade = 1.0f;
+
+                Uint8 color = (Uint8)(255 * shade);
+                printf("color %d\n", color);
+                SDL_SetRenderDrawColor(renderer3D, color, 0, 0, 255);
+
+                /* ---------- ÉPAISSEUR (équivalent glLineWidth(8)) ---------- */
+                for (int w = 0; w < 8; w++)
+                {
+                    SDL_RenderDrawLine(
+                        renderer3D,
+                        wallX + w,
+                        lineOff,
+                        wallX + w,
+                        lineOff + lineH
+                    );
+                }
                 break;
             }
         }
 
-        if(renderer!=NULL){
+        if(renderer2D!=NULL){
             if (hasHit){
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                SDL_SetRenderDrawColor(renderer2D, 255, 0, 0, 255);
             }
             else{
-                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+                SDL_SetRenderDrawColor(renderer2D, 0, 255, 0, 255);
             }
-            SDL_RenderDrawLine(renderer, camera->position.x, camera->position.y, end.x, end.y);
+            SDL_RenderDrawLine(renderer2D, camera->position.x, camera->position.y, end.x, end.y);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 Player initPlayer(SDL_Renderer *renderer)
 {
-	SDL_Rect position = {10, 10, 30, 20};
+	SDL_Rect position = {100, 100, 30, 20};
 	SDL_FPoint point = {position.x, position.y};
 	Player player = {point, position, 90, NULL, .4};
 
