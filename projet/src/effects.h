@@ -7,7 +7,7 @@
 
 #define MAX_EXPLOSIONS 20
 #define EXPLOSION_FRAMES 5
-#define EXPLOSION_SPEED 100 // ms per frame
+#define EXPLOSION_SPEED 140 // ms per frame
 
 typedef struct {
     int active;

@@ -60,9 +60,10 @@ int main(int argc, char *argv[])
 	Player player = initPlayer(renderer);
 	EffectManager effects = initEffects(renderer);
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
+	MusicPlayer playerUI = initMusicPlayer();
 
 	Camera camera = CreateCamera(CreateVector(player.pos.x, player.pos.y), player.angle, 60);
-
+ 
 	int fin = 0;
 	while (!fin)
 	{
@@ -70,8 +71,10 @@ int main(int argc, char *argv[])
 		SDL_SetRenderDrawColor(renderer2, 0, 0, 0, 255); // fond noir
 		SDL_RenderClear(renderer);
 		SDL_RenderClear(renderer2);
+
 		
 		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects);
+
 
 		// Boucle principale
 		if (SDL_PollEvent(&event))
@@ -83,20 +86,33 @@ int main(int argc, char *argv[])
 				break;
 
 			case SDL_KEYDOWN:
-				printf("touche %c\n", event.key.keysym.sym);
+				// printf("touche %c\n", event.key.keysym.sym);
 				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if (event.button.button == SDL_BUTTON_LEFT)
+				{
+					int mouseX = event.button.x;
+					int mouseY = event.button.y;
+					handleMusicPlayerClick(mouseX, mouseY, &playerUI);
+				}
 				break;
 			}
 		}
 
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+		// printf("fatigue : %f\n", player.fatigue);
+		player.fatigue -=.001;
 
 		drawWalls(renderer, walls, wall_count);
+		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effects);
+
 		UpdateCameraPlayer(&camera, &player);
 		drawPlayer(renderer, player);
 		CheckRays(&camera, 5, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer, renderer2);
 		updateEffects(&effects); // Update animations
 		drawEffects(&effects, renderer); // Draw them
+		
 		SDL_RenderPresent(renderer);
 		SDL_RenderPresent(renderer2);
 		SDL_Delay(16);
