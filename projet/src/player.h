@@ -6,7 +6,6 @@
 #include "gestionSDL.h"
 #include "effects.h"
 #include "musicPlayer.h"
-#define DEG2RAD (M_PI / 180.0f)
 #define SPEED_MIN 0.4f
 #define SPEED_MAX 2.0f
 #define FATIGUE_MIN 0.4f

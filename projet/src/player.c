@@ -27,7 +27,7 @@ void drawPlayer(SDL_Renderer *renderer, Player player)
 
 void movePlayer(Player *player)
 {
-	float rad = player->angle * DEG2RAD;
+	float rad =  DEG2RAD(player->angle);
 
 	player->pos.x += cosf(rad) * player->vitesse;
 	player->pos.y += sinf(rad) * player->vitesse;
@@ -109,8 +109,8 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, S
     drawSpeedGauge(renderer, player);
     drawFatigueGauge(renderer, player);
     drawSteeringWheel(renderer, player);
-	drawMusicPlayer(renderer, playerUI);
-	drawMinimap(renderer, player, walls, wallCount, effects);
+    drawMusicPlayer(renderer, playerUI);
+    drawMinimap(renderer, player, effects);
 }
 
 void drawSteeringWheel(SDL_Renderer *renderer, Player player)
@@ -215,7 +215,7 @@ static void drawSpeedGauge(SDL_Renderer *renderer, Player player)
 
 static void drawNeedle(SDL_Renderer *renderer, int cx, int cy, int length, float angle)
 {
-    float rad = angle * DEG2RAD;
+    float rad = DEG2RAD(angle);
 
     int x2 = cx + cosf(rad) * length;
     int y2 = cy + sinf(rad) * length;

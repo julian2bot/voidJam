@@ -5,7 +5,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define DEG2RAD(x) ((x) * M_PI / 180.0f)
 
 Camera CreateCamera(Vector2 position, float rotation, float fov){
     Camera camera = {position, DEG2RAD(rotation), fov, 0,0};

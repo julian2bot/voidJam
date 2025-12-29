@@ -58,15 +58,18 @@ int main(int argc, char *argv[])
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 	MusicPlayer playerUI = initMusicPlayer();
 
+	// Initialize map grid and walls (cell size 64)
+	initMap(64);
+
 	Camera camera = CreateCamera(CreateVector(player.pos.x, player.pos.y), player.angle, 60);
- 
+
 	int fin = 0;
 	while (!fin)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // fond noir
 		SDL_RenderClear(renderer);
 
-		
+
 		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects);
 
 
@@ -96,24 +99,23 @@ int main(int argc, char *argv[])
 
 		// printf("fatigue : %f\n", player.fatigue);
 		player.fatigue -=.001;
-		CheckRays(&camera, 5, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
-		
+		CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
+
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// drawWalls(renderer, walls, wall_count);
 		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effects);
-
 		UpdateCameraPlayer(&camera, &player);
 		// drawPlayer(renderer, player);
 		updateEffects(&effects); // Update animations
 		drawEffects(&effects, renderer); // Draw them
-		
+
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16);
 	}
-	
+
 	destroyPlayer(player);
 	destroyEffects(&effects);
-	
+
 	SDL_DestroyWindow(mafenetre);
 	TTF_Quit();
 	SDL_Quit();
