@@ -113,11 +113,11 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI)
 
 void drawSteeringWheel(SDL_Renderer *renderer, Player player)
 {
-    int cx = 200;
+    int cx = 150;
     int cy = SCREEN_HEIGHT - 120;
 
-    int outerR = 125;
-    int innerR = 115;
+    int outerR = 115;
+    int innerR = 105;
     int hubR   = 10;
 
     float angle = player.wheelAngle * 2.0f;
@@ -144,8 +144,8 @@ void drawSteeringWheel(SDL_Renderer *renderer, Player player)
 
 static void drawFatigueGauge(SDL_Renderer *renderer, Player player)
 {
-    int cx = 550;
-    int cy = SCREEN_HEIGHT - 120;
+    int cx = 390;
+    int cy = SCREEN_HEIGHT - 140;
 
     float ratio = (player.fatigue - FATIGUE_MIN) / (FATIGUE_MAX - FATIGUE_MIN);
     if (ratio < 0) ratio = 0;
@@ -177,8 +177,8 @@ static void drawFatigueGauge(SDL_Renderer *renderer, Player player)
 
 static void drawSpeedGauge(SDL_Renderer *renderer, Player player)
 {
-    int cx = 450;
-    int cy = SCREEN_HEIGHT - 90;
+    int cx = 310;
+    int cy = SCREEN_HEIGHT - 80;
 
     // Ratio vitesse
     float ratio = (player.vitesse - SPEED_MIN) / (SPEED_MAX - SPEED_MIN);

@@ -80,3 +80,55 @@ void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2)
         SDL_RenderDrawLine(r, x1, y1, x2, y2);
     }
 }
+ void drawPrevIcon(SDL_Renderer *renderer, SDL_Rect r)
+{
+    int cx = r.x + r.w / 2;
+    int cy = r.y + r.h / 2;
+    int size = r.w / 3;
+
+    SDL_RenderDrawLine(renderer,
+        cx + size, cy - size,
+        cx - size, cy);
+
+    SDL_RenderDrawLine(renderer,
+        cx - size, cy,
+        cx + size, cy + size);
+}
+
+ void drawNextIcon(SDL_Renderer *renderer, SDL_Rect r)
+{
+    int cx = r.x + r.w / 2;
+    int cy = r.y + r.h / 2;
+    int size = r.w / 3;
+
+    SDL_RenderDrawLine(renderer,
+        cx - size, cy - size,
+        cx + size, cy);
+
+    SDL_RenderDrawLine(renderer,
+        cx + size, cy,
+        cx - size, cy + size);
+}
+
+ void drawPauseIcon(SDL_Renderer *renderer, SDL_Rect r)
+{
+    int barWidth  = r.w / 6;
+    int barHeight = r.h / 2;
+
+    SDL_Rect leftBar = {
+        r.x + r.w / 2 - barWidth - 3,
+        r.y + r.h / 2 - barHeight / 2,
+        barWidth,
+        barHeight
+    };
+
+    SDL_Rect rightBar = {
+        r.x + r.w / 2 + 3,
+        r.y + r.h / 2 - barHeight / 2,
+        barWidth,
+        barHeight
+    };
+
+    SDL_RenderFillRect(renderer, &leftBar);
+    SDL_RenderFillRect(renderer, &rightBar);
+}

@@ -23,6 +23,9 @@ typedef struct MusicPlayer
 MusicPlayer initMusicPlayer();
 void drawMusicPlayer(SDL_Renderer *renderer, MusicPlayer* playerUI);
 void handleMusicPlayerClick(int mouseX, int mouseY, MusicPlayer* playerUI);
+void drawPauseIcon(SDL_Renderer *renderer, SDL_Rect r);
+void drawNextIcon(SDL_Renderer *renderer, SDL_Rect r);
+void drawPrevIcon(SDL_Renderer *renderer, SDL_Rect r);
 
 
 #endif
