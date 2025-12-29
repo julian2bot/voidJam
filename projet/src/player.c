@@ -43,7 +43,7 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 	SDL_Rect intersect;
 	if(collision(player, walls, wall_count, &intersect))
 	{
-		if(player->vitesse > 0) addExplosion(effects, intersect.x + intersect.w / 2, intersect.y + intersect.h / 2);
+		// if(player->vitesse > 0) addExplosion(effects, intersect.x + intersect.w / 2, intersect.y + intersect.h / 2);
 		printf("Collision\n");
 		gameOver(player);
 		return;

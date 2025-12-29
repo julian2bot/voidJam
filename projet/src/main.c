@@ -49,13 +49,9 @@ int main(int argc, char *argv[])
 	SDL_Event event;		// Structure pour gerer les evenements clavier, souris, joystick
 	SDL_Renderer *renderer = NULL; // Canvas
 
-	SDL_Window *mafenetre2 = NULL;
-	SDL_Renderer *renderer2 = NULL; // Canvas
-
 	TTF_Init();
 
 	init(&mafenetre, &renderer);
-	init(&mafenetre2, &renderer2);
 
 	Player player = initPlayer(renderer);
 	EffectManager effects = initEffects(renderer);
@@ -68,9 +64,7 @@ int main(int argc, char *argv[])
 	while (!fin)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // fond noir
-		SDL_SetRenderDrawColor(renderer2, 0, 0, 0, 255); // fond noir
 		SDL_RenderClear(renderer);
-		SDL_RenderClear(renderer2);
 
 		
 		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects);
@@ -100,21 +94,20 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// printf("fatigue : %f\n", player.fatigue);
 		player.fatigue -=.001;
-
-		drawWalls(renderer, walls, wall_count);
+		CheckRays(&camera, 5, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
+		
+		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+		// drawWalls(renderer, walls, wall_count);
 		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effects);
 
 		UpdateCameraPlayer(&camera, &player);
-		drawPlayer(renderer, player);
-		CheckRays(&camera, 5, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer, renderer2);
+		// drawPlayer(renderer, player);
 		updateEffects(&effects); // Update animations
 		drawEffects(&effects, renderer); // Draw them
 		
 		SDL_RenderPresent(renderer);
-		SDL_RenderPresent(renderer2);
 		SDL_Delay(16);
 	}
 	
@@ -122,7 +115,6 @@ int main(int argc, char *argv[])
 	destroyEffects(&effects);
 	
 	SDL_DestroyWindow(mafenetre);
-	SDL_DestroyWindow(mafenetre2);
 	TTF_Quit();
 	SDL_Quit();
 	exit(0);

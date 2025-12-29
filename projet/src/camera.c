@@ -40,7 +40,7 @@ void UpdateCameraPlayer(Camera *camera, Player *player){
     UpdateRotation(camera, player->angle);
 }
 
-void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallNumber, int screenW, int screenH, SDL_Renderer *renderer2D, SDL_Renderer *renderer3D){
+void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallNumber, int screenW, int screenH, SDL_Renderer *renderer3D){
     float angleX, angleY = 0;
     int startOffset = 50;
     float startAngle = camera->radiant - DEG2RAD(camera->fov/2);
@@ -76,60 +76,54 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
             }
             if (hasHit)
             {
-                /* ---------- DISTANCE ---------- */
-                disH = Distance(camera->position, end);
-
-                /* ---------- FIX FISHEYE ---------- */
-                ca = camera->radiant - (startAngle + DEG2RAD(1) * (r + 1));
-
-                /* normalisation angle */
-                if (ca < 0) ca += 2 * M_PI;
-                if (ca > 2 * M_PI) ca -= 2 * M_PI;
-
-                // disH = disH * cosf(ca);
-
-                /* ---------- HAUTEUR DU MUR ---------- */
-                lineH = (wallSize*screenH) / disH;
-                if (lineH > screenH) lineH = screenH;
-
-                /* ---------- OFFSET VERTICAL ---------- */
-                lineOff = (screenH / 2) - (lineH / 2);
-
-                /* ---------- POSITION X DU RAYON ---------- */
-                wallX = (int)(r * colW);
-
-                /* ---------- COULEUR ---------- */
-                shade = 1.0f - (disH / maxDist);
-
-                if (shade < 0.1f) shade = 0.1f;
-                if (shade > 1.0f) shade = 1.0f;
-
-                SDL_SetRenderDrawColor(renderer3D, (255 * shade), 0, 0, 255);
-
-                /* ---------- ÉPAISSEUR (équivalent glLineWidth(8)) ---------- */
-                for (int w = 0; w < 8; w++)
-                {
-                    SDL_RenderDrawLine(
-                        renderer3D,
-                        wallX + w,
-                        lineOff - wallSize,
-                        wallX + w,
-                        lineOff + lineH - wallSize
-                    );
+                if(renderer3D != NULL){
+                    /* ---------- DISTANCE ---------- */
+                    disH = Distance(camera->position, end);
+    
+                    /* ---------- FIX FISHEYE ---------- */
+                    ca = camera->radiant - (startAngle + DEG2RAD(1) * (r + 1));
+    
+                    /* normalisation angle */
+                    if (ca < 0) ca += 2 * M_PI;
+                    if (ca > 2 * M_PI) ca -= 2 * M_PI;
+    
+                    // disH = disH * cosf(ca);
+    
+                    /* ---------- HAUTEUR DU MUR ---------- */
+                    lineH = (wallSize*screenH) / disH;
+                    if (lineH > screenH) lineH = screenH;
+    
+                    /* ---------- OFFSET VERTICAL ---------- */
+                    lineOff = (screenH / 2) - (lineH / 2);
+    
+                    /* ---------- POSITION X DU RAYON ---------- */
+                    wallX = (int)(r * colW);
+    
+                    /* ---------- COULEUR ---------- */
+                    shade = 1.0f - (disH / maxDist);
+    
+                    if (shade < 0.1f) shade = 0.1f;
+                    if (shade > 1.0f) shade = 1.0f;
+    
+                    SDL_SetRenderDrawColor(renderer3D, (255 * shade), 0, 0, 255);
+    
+                    /* ---------- ÉPAISSEUR (équivalent glLineWidth(8)) ---------- */
+                    for (int w = 0; w < 8; w++)
+                    {
+                        SDL_RenderDrawLine(
+                            renderer3D,
+                            wallX + w,
+                            lineOff - wallSize,
+                            wallX + w,
+                            lineOff + lineH - wallSize
+                        );
+                    }
                 }
                 break;
             }
         }
 
-        if(renderer2D!=NULL){
-            if (hasHit){
-                SDL_SetRenderDrawColor(renderer2D, 255, 0, 0, 255);
-            }
-            else{
-                SDL_SetRenderDrawColor(renderer2D, 0, 255, 0, 255);
-            }
-            SDL_RenderDrawLine(renderer2D, camera->position.x, camera->position.y, end.x, end.y);
-        }
+        
     }
 }
 
