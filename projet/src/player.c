@@ -110,6 +110,7 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, S
     drawFatigueGauge(renderer, player);
     drawSteeringWheel(renderer, player);
     drawMusicPlayer(renderer, playerUI);
+    drawPlaylistOverlay(renderer, playerUI);
     drawMinimap(renderer, player, effects);
 }
 

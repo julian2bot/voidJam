@@ -11,6 +11,7 @@
 #include "gestionSDL.h"
 #include "effects.h"
 #include "camera.h"
+#include "audio.h"
 
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
@@ -56,6 +57,12 @@ int main(int argc, char *argv[])
 	Player player = initPlayer(renderer);
 	EffectManager effects = initEffects(renderer);
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
+
+	// initialize audio from folder (expects .ogg files)
+	if (!audio_init_dir("assets/music")) {
+		fprintf(stderr, "Warning: no audio tracks loaded from assets/music\n");
+	}
+
 	MusicPlayer playerUI = initMusicPlayer();
 
 	// Initialize map grid and walls (cell size 64)
@@ -115,6 +122,8 @@ int main(int argc, char *argv[])
 
 	destroyPlayer(player);
 	destroyEffects(&effects);
+
+    audio_quit();
 
 	SDL_DestroyWindow(mafenetre);
 	TTF_Quit();
