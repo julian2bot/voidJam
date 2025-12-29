@@ -45,12 +45,12 @@ int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *interse
 void gameOver(Player *player);
 void drawCockPit(SDL_Renderer *renderer, Player player);
 
+//dash board
 static void drawSteeringWheel(SDL_Renderer *renderer, Player player);
 static void drawFatigueGauge(SDL_Renderer *renderer, Player player);
 static void drawSpeedGauge(SDL_Renderer *renderer, Player player);
 static void drawNeedle(SDL_Renderer *renderer, int cx, int cy, int length, float angle);
 static void drawDashboard(SDL_Renderer *renderer);
-void drawCircle(SDL_Renderer *renderer, int cx, int cy, int radius);
 void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2);
 void drawThickLine(SDL_Renderer *r, int x1, int y1, int x2, int y2, int thickness);
 void updateSteering(Player *player, int left, int right, float dt);

@@ -77,26 +77,6 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
     movePlayer(player);
 }
 
-void updateSteering(Player *player, int left, int right, float dt)
-{
-    if (left)
-        player->wheelVelocity += STEER_FORCE * dt;
-    if (right)
-        player->wheelVelocity -= STEER_FORCE * dt;
-
-    player->wheelVelocity += -player->wheelAngle * RETURN_FORCE * dt;
-
-    player->wheelVelocity *= expf(-DAMPING * dt);
-
-    player->wheelAngle += player->wheelVelocity * dt;
-
-    if (player->wheelAngle > MAX_WHEEL)
-        player->wheelAngle = MAX_WHEEL;
-    if (player->wheelAngle < -MAX_WHEEL)
-        player->wheelAngle = -MAX_WHEEL;
-}
-
-
 int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *intersection)
 {
 	for (int i = 0; i < wall_count; i++)
@@ -120,29 +100,43 @@ void destroyPlayer(Player p)
 }
 
 
-static void drawDashboard(SDL_Renderer *renderer)
+// Dashboard
+void drawCockPit(SDL_Renderer *renderer, Player player)
 {
-    SDL_Rect dash = {
-        0,
-        SCREEN_HEIGHT - 180,
-        SCREEN_WIDTH,
-        180
-    };
-
-    SDL_SetRenderDrawColor(renderer, 25, 25, 25, 255);
-    SDL_RenderFillRect(renderer, &dash);
+    drawDashboard(renderer);
+    drawSpeedGauge(renderer, player);
+    drawFatigueGauge(renderer, player);
+    drawSteeringWheel(renderer, player);
 }
-static void drawNeedle(SDL_Renderer *renderer,
-                       int cx, int cy,
-                       int length,
-                       float angle)
+
+void drawSteeringWheel(SDL_Renderer *renderer, Player player)
 {
-    float rad = angle * DEG2RAD;
+    int cx = 200;
+    int cy = SCREEN_HEIGHT - 120;
 
-    int x2 = cx + cosf(rad) * length;
-    int y2 = cy + sinf(rad) * length;
+    int outerR = 125;
+    int innerR = 115;
+    int hubR   = 10;
 
-    SDL_RenderDrawLine(renderer, cx, cy, x2, y2);
+    float angle = player.wheelAngle * 2.0f;
+
+    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+
+    drawRing(renderer, cx, cy, innerR, outerR);
+    drawRing(renderer, cx, cy, 0, hubR);
+
+    for (int i = 0; i < 3; i++)
+    {
+        float a = angle + i * (2.0f * M_PI / 3.0f);
+
+        int x1 = cx + cosf(a) * hubR;
+        int y1 = cy + sinf(a) * hubR;
+
+        int x2 = cx + cosf(a) * innerR;
+        int y2 = cy + sinf(a) * innerR;
+
+        drawThickLine(renderer, x1, y1, x2, y2, 2);
+    }
 }
 
 
@@ -178,126 +172,6 @@ static void drawFatigueGauge(SDL_Renderer *renderer, Player player)
 	drawText(renderer, NULL, NULL, "Fatigue", cx - 15, cy + 35, 14);
 }
 
-
-
-void drawSteeringWheel(SDL_Renderer *renderer, Player player)
-{
-    int cx = 200;
-    int cy = SCREEN_HEIGHT - 120;
-
-    int outerR = 125;
-    int innerR = 115;
-    int hubR   = 10;
-
-    float angle = player.wheelAngle * 2.0f;
-
-    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-
-    drawRing(renderer, cx, cy, innerR, outerR);
-    drawRing(renderer, cx, cy, 0, hubR);
-
-    for (int i = 0; i < 3; i++)
-    {
-        float a = angle + i * (2.0f * M_PI / 3.0f);
-
-        int x1 = cx + cosf(a) * hubR;
-        int y1 = cy + sinf(a) * hubR;
-
-        int x2 = cx + cosf(a) * innerR;
-        int y2 = cy + sinf(a) * innerR;
-
-        drawThickLine(renderer, x1, y1, x2, y2, 2);
-    }
-}
-
-void drawArc(SDL_Renderer *r, int cx, int cy, int radius, float aStart, float aEnd)
-{
-    int steps = 120;
-    for (int i = 0; i < steps; i++)
-    {
-        float t1 = (float)i / steps;
-        float t2 = (float)(i + 1) / steps;
-
-        float a1 = (aStart + t1 * (aEnd - aStart)) * M_PI / 180.0f;
-        float a2 = (aStart + t2 * (aEnd - aStart)) * M_PI / 180.0f;
-
-        int x1 = cx + cosf(a1) * radius;
-        int y1 = cy + sinf(a1) * radius;
-        int x2 = cx + cosf(a2) * radius;
-        int y2 = cy + sinf(a2) * radius;
-
-        SDL_RenderDrawLine(r, x1, y1, x2, y2);
-    }
-}
-
-void drawFatigueArc(SDL_Renderer *r, int cx, int cy, int r1, int r2, float aStart, float aEnd)
-{
-    for (int i = 0; i < 360; i++)
-    {
-        float a = (aStart + (float)i / 360.0f * (aEnd - aStart)) * M_PI / 180.0f;
-
-        int x1 = cx + cosf(a) * r1;
-        int y1 = cy + sinf(a) * r1;
-        int x2 = cx + cosf(a) * r2;
-        int y2 = cy + sinf(a) * r2;
-
-        SDL_RenderDrawLine(r, x1, y1, x2, y2);
-    }
-}
-void drawFatigueTicks(SDL_Renderer *r, int cx, int cy)
-{
-    float start = -120.0f;
-    float end   = 120.0f;
-
-    int r1 = 28;
-    int r2 = 32;
-
-    int ticks = 10;
-
-    for (int i = 0; i <= ticks; i++)
-    {
-        float t = (float)i / ticks;
-        float angle = (start + t * (end - start)) * M_PI / 180.0f;
-
-        int x1 = cx + cosf(angle) * r1;
-        int y1 = cy + sinf(angle) * r1;
-        int x2 = cx + cosf(angle) * r2;
-        int y2 = cy + sinf(angle) * r2;
-
-        drawThickLine(r, x1, y1, x2, y2, 2);
-    }
-}
-
-void drawSpeedTicks(SDL_Renderer *r, int cx, int cy)
-{
-    float start = -120.0f;
-    float end   = 120.0f;
-
-    int smallR1 = 52;
-    int smallR2 = 58;
-    int bigR1   = 48;
-    int bigR2   = 60;
-
-    int tickCount = 20;
-
-    for (int i = 0; i <= tickCount; i++)
-    {
-        float t = (float)i / tickCount;
-        float angle = (start + t * (end - start)) * M_PI / 180.0f;
-
-        int isBig = (i % 5 == 0);
-
-        int r1 = isBig ? bigR1 : smallR1;
-        int r2 = isBig ? bigR2 : smallR2;
-
-        int x1 = cx + cosf(angle) * r1;
-        int y1 = cy + sinf(angle) * r1;
-        int x2 = cx + cosf(angle) * r2;
-        int y2 = cy + sinf(angle) * r2;
-
-        SDL_RenderDrawLine(r, x1, y1, x2, y2);
-    }
-}
 
 static void drawSpeedGauge(SDL_Renderer *renderer, Player player)
 {
@@ -335,6 +209,31 @@ static void drawSpeedGauge(SDL_Renderer *renderer, Player player)
 }
 
 
+static void drawNeedle(SDL_Renderer *renderer, int cx, int cy, int length, float angle)
+{
+    float rad = angle * DEG2RAD;
+
+    int x2 = cx + cosf(rad) * length;
+    int y2 = cy + sinf(rad) * length;
+
+    SDL_RenderDrawLine(renderer, cx, cy, x2, y2);
+}
+
+
+static void drawDashboard(SDL_Renderer *renderer)
+{
+    SDL_Rect dash = {
+        0,
+        SCREEN_HEIGHT - 180,
+        SCREEN_WIDTH,
+        180
+    };
+
+    SDL_SetRenderDrawColor(renderer, 25, 25, 25, 255);
+    SDL_RenderFillRect(renderer, &dash);
+}
+
+
 void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2)
 {
     for (int i = 0; i < 360; i++)
@@ -348,6 +247,7 @@ void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2)
     }
 }
 
+
 void drawThickLine(SDL_Renderer *r, int x1, int y1, int x2, int y2, int thickness)
 {
     for (int i = -thickness; i <= thickness; i++)
@@ -357,10 +257,114 @@ void drawThickLine(SDL_Renderer *r, int x1, int y1, int x2, int y2, int thicknes
     }
 }
 
-void drawCockPit(SDL_Renderer *renderer, Player player)
+
+void updateSteering(Player *player, int left, int right, float dt)
 {
-    drawDashboard(renderer);
-    drawSpeedGauge(renderer, player);
-    drawFatigueGauge(renderer, player);
-    drawSteeringWheel(renderer, player);
+    if (left)
+        player->wheelVelocity += STEER_FORCE * dt;
+    if (right)
+        player->wheelVelocity -= STEER_FORCE * dt;
+
+    player->wheelVelocity += -player->wheelAngle * RETURN_FORCE * dt;
+
+    player->wheelVelocity *= expf(-DAMPING * dt);
+
+    player->wheelAngle += player->wheelVelocity * dt;
+
+    if (player->wheelAngle > MAX_WHEEL)
+        player->wheelAngle = MAX_WHEEL;
+    if (player->wheelAngle < -MAX_WHEEL)
+        player->wheelAngle = -MAX_WHEEL;
+}
+
+
+void drawArc(SDL_Renderer *r, int cx, int cy, int radius, float aStart, float aEnd)
+{
+    int steps = 120;
+    for (int i = 0; i < steps; i++)
+    {
+        float t1 = (float)i / steps;
+        float t2 = (float)(i + 1) / steps;
+
+        float a1 = (aStart + t1 * (aEnd - aStart)) * M_PI / 180.0f;
+        float a2 = (aStart + t2 * (aEnd - aStart)) * M_PI / 180.0f;
+
+        int x1 = cx + cosf(a1) * radius;
+        int y1 = cy + sinf(a1) * radius;
+        int x2 = cx + cosf(a2) * radius;
+        int y2 = cy + sinf(a2) * radius;
+
+        SDL_RenderDrawLine(r, x1, y1, x2, y2);
+    }
+}
+
+
+void drawSpeedTicks(SDL_Renderer *r, int cx, int cy)
+{
+    float start = -120.0f;
+    float end   = 120.0f;
+
+    int smallR1 = 52;
+    int smallR2 = 58;
+    int bigR1   = 48;
+    int bigR2   = 60;
+
+    int tickCount = 20;
+
+    for (int i = 0; i <= tickCount; i++)
+    {
+        float t = (float)i / tickCount;
+        float angle = (start + t * (end - start)) * M_PI / 180.0f;
+
+        int isBig = (i % 5 == 0);
+
+        int r1 = isBig ? bigR1 : smallR1;
+        int r2 = isBig ? bigR2 : smallR2;
+
+        int x1 = cx + cosf(angle) * r1;
+        int y1 = cy + sinf(angle) * r1;
+        int x2 = cx + cosf(angle) * r2;
+        int y2 = cy + sinf(angle) * r2;
+
+        SDL_RenderDrawLine(r, x1, y1, x2, y2);
+    }
+}
+
+void drawFatigueArc(SDL_Renderer *r, int cx, int cy, int r1, int r2, float aStart, float aEnd)
+{
+    for (int i = 0; i < 360; i++)
+    {
+        float a = (aStart + (float)i / 360.0f * (aEnd - aStart)) * M_PI / 180.0f;
+
+        int x1 = cx + cosf(a) * r1;
+        int y1 = cy + sinf(a) * r1;
+        int x2 = cx + cosf(a) * r2;
+        int y2 = cy + sinf(a) * r2;
+
+        SDL_RenderDrawLine(r, x1, y1, x2, y2);
+    }
+}
+
+void drawFatigueTicks(SDL_Renderer *r, int cx, int cy)
+{
+    float start = -120.0f;
+    float end   = 120.0f;
+
+    int r1 = 28;
+    int r2 = 32;
+
+    int ticks = 10;
+
+    for (int i = 0; i <= ticks; i++)
+    {
+        float t = (float)i / ticks;
+        float angle = (start + t * (end - start)) * M_PI / 180.0f;
+
+        int x1 = cx + cosf(angle) * r1;
+        int y1 = cy + sinf(angle) * r1;
+        int x2 = cx + cosf(angle) * r2;
+        int y2 = cy + sinf(angle) * r2;
+
+        drawThickLine(r, x1, y1, x2, y2, 2);
+    }
 }
