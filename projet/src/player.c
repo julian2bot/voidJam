@@ -101,12 +101,14 @@ void destroyPlayer(Player p)
 
 
 // Dashboard
-void drawCockPit(SDL_Renderer *renderer, Player player)
+void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI)
 {
     drawDashboard(renderer);
     drawSpeedGauge(renderer, player);
     drawFatigueGauge(renderer, player);
     drawSteeringWheel(renderer, player);
+	drawMusicPlayer(renderer, playerUI);
+
 }
 
 void drawSteeringWheel(SDL_Renderer *renderer, Player player)
@@ -234,18 +236,6 @@ static void drawDashboard(SDL_Renderer *renderer)
 }
 
 
-void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2)
-{
-    for (int i = 0; i < 360; i++)
-    {
-        float a = i * M_PI / 180.0f;
-        int x1 = cx + cosf(a) * r1;
-        int y1 = cy + sinf(a) * r1;
-        int x2 = cx + cosf(a) * r2;
-        int y2 = cy + sinf(a) * r2;
-        SDL_RenderDrawLine(r, x1, y1, x2, y2);
-    }
-}
 
 
 void drawThickLine(SDL_Renderer *r, int x1, int y1, int x2, int y2, int thickness)

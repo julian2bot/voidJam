@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	Player player = initPlayer(renderer);
 	EffectManager effects = initEffects(renderer);
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
-
+	MusicPlayer playerUI = initMusicPlayer();
 	int fin = 0;
 	while (!fin)
 	{
@@ -59,19 +59,27 @@ int main(int argc, char *argv[])
 				break;
 
 			case SDL_KEYDOWN:
-				printf("touche %c\n", event.key.keysym.sym);
+				// printf("touche %c\n", event.key.keysym.sym);
 				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if (event.button.button == SDL_BUTTON_LEFT)
+				{
+					int mouseX = event.button.x;
+					int mouseY = event.button.y;
+					handleMusicPlayerClick(mouseX, mouseY, &playerUI);
+				}
 				break;
 			}
 		}
 
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-		printf("fatigue : %f\n", player.fatigue);
+		// printf("fatigue : %f\n", player.fatigue);
 		player.fatigue -=.001;
 
 		drawWalls(renderer, walls, wall_count);
 
-		drawCockPit(renderer, player);
+		drawCockPit(renderer, player, &playerUI);
 		movePlayer(&player);
 		drawPlayer(renderer, player);
 		updateEffects(&effects); // Update animations

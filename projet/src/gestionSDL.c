@@ -29,6 +29,9 @@ void destroy_textures(unsigned int nb_textures, ...)
     va_end(args);
 }
 
+
+
+// draw 
 void drawText(SDL_Renderer *renderer, TTF_Font *font, SDL_Color *color, const char *text, int x, int y, int size)
 {
     if(text == NULL) return;
@@ -62,4 +65,18 @@ void drawText(SDL_Renderer *renderer, TTF_Font *font, SDL_Color *color, const ch
     SDL_RenderCopy(renderer, texture, NULL, &rect);
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(surface);
+}
+
+
+void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2)
+{
+    for (int i = 0; i < 360; i++)
+    {
+        float a = i * M_PI / 180.0f;
+        int x1 = cx + cosf(a) * r1;
+        int y1 = cy + sinf(a) * r1;
+        int x2 = cx + cosf(a) * r2;
+        int y2 = cy + sinf(a) * r2;
+        SDL_RenderDrawLine(r, x1, y1, x2, y2);
+    }
 }
