@@ -1,20 +1,15 @@
 #include "Vector2.h"
 
-
-Vector2 createVectorZero(){
-    return createVector(0,0);
+Vector2 CreateVectorZero(){
+    return CreateVector(0,0);
 }
 
-Vector2 createVector(float x, float y){
+Vector2 CreateVector(float x, float y){
     Vector2 vector2 = {x,y};
     return vector2;
 }
 
-int LineLineIntersect(
-    Vector2 a1, Vector2 a2,
-    Vector2 b1, Vector2 b2,
-    Vector2 *out
-)
+int LineLineIntersect(Vector2 a1, Vector2 a2, Vector2 b1, Vector2 b2, Vector2 *out)
 {
     float den =
         (a1.x - a2.x) * (b1.y - b2.y) -
@@ -43,20 +38,16 @@ int LineLineIntersect(
     return 0;
 }
 
-int LineRectIntersect(
-    Vector2 pos1, Vector2 pos2,
-    SDL_Rect *rect,
-    Vector2 *posOut
-)
+int LineRectIntersect(Vector2 pos1, Vector2 pos2, SDL_Rect *rect, Vector2 *posOut)
 {
     Vector2 hit;
     float closestDist = FLT_MAX;
     int collided = 0;
 
-    Vector2 r1 = { rect->x,             rect->y };
-    Vector2 r2 = { rect->x + rect->w,   rect->y };
-    Vector2 r3 = { rect->x + rect->w,   rect->y + rect->h };
-    Vector2 r4 = { rect->x,             rect->y + rect->h };
+    Vector2 r1 = { rect->x, rect->y };
+    Vector2 r2 = { rect->x + rect->w, rect->y };
+    Vector2 r3 = { rect->x + rect->w, rect->y + rect->h };
+    Vector2 r4 = { rect->x, rect->y + rect->h };
 
     Vector2 tmp;
 
@@ -92,4 +83,11 @@ int LineRectIntersect(
         *posOut = hit;
 
     return collided;
+}
+
+float Distance(Vector2 a, Vector2 b)
+{
+    float dx = b.x - a.x;
+    float dy = b.y - a.y;
+    return sqrtf(dx * dx + dy * dy);
 }

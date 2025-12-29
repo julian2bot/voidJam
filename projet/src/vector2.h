@@ -10,18 +10,11 @@ typedef struct vector2{
     float y;
 } Vector2;
 
-Vector2 createVectorZero();
-Vector2 createVector(float x, float y);
-int LineRectIntersect(
-    Vector2 pos1, Vector2 pos2,
-    SDL_Rect *rect,
-    Vector2 *posOut
-);
+Vector2 CreateVectorZero();
+Vector2 CreateVector(float x, float y);
+int LineRectIntersect(Vector2 pos1, Vector2 pos2, SDL_Rect *rect, Vector2 *posOut);
+int LineLineIntersect(Vector2 a1, Vector2 a2, Vector2 b1, Vector2 b2, Vector2 *out);
 
-int LineLineIntersect(
-    Vector2 a1, Vector2 a2,
-    Vector2 b1, Vector2 b2,
-    Vector2 *out
-);
+float Distance(Vector2 vector1, Vector2 vector2);
 
 #endif

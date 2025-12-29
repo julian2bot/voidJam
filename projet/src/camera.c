@@ -41,11 +41,8 @@ void UpdateCameraPlayer(Camera *camera, Player *player){
 }
 
 void CheckRays(Camera *camera, int raysNumber, int raysOffestNumber, SDL_Rect walls[], int wallNumber, SDL_Renderer *renderer){
-    if(renderer!=NULL){
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    }
+    
 
-    float endX, endY = 0;
     float angleX, angleY = 0;
     int startOffset = 50;
 
@@ -62,28 +59,33 @@ void CheckRays(Camera *camera, int raysNumber, int raysOffestNumber, SDL_Rect wa
 
         for (int i = 0; i < raysOffestNumber; i++)
         {
-            endX = camera->position.x + angleX * (startOffset * (i+1));
-            endY = camera->position.y + angleY * (startOffset * (i+1));
-            end = createVector(endX,endY);
+            end = CreateVector(camera->position.x + angleX * (startOffset * (i+1)),camera->position.y + angleY * (startOffset * (i+1)));
 
             for (int i = 0; i < wallNumber; i++)
             {
                 hasHit = LineRectIntersect(camera->position, end, &walls[i], &hit);
                 if (hasHit)
                 {
-                    endX = hit.x;
-                    endY = hit.y;
+                    end.x = hit.x;
+                    end.y = hit.y;
                     break;
                 }
             }
             if (hasHit)
             {
+                printf("Distance %.2f\n", Distance(camera->position, end));
                 break;
             }
         }
 
         if(renderer!=NULL){
-            SDL_RenderDrawLine(renderer, camera->position.x, camera->position.y, endX, endY);
+            if (hasHit){
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            }
+            else{
+                SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+            }
+            SDL_RenderDrawLine(renderer, camera->position.x, camera->position.y, end.x, end.y);
         }
     }
 }
