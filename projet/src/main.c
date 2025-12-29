@@ -66,8 +66,12 @@ int main(int argc, char *argv[])
 		}
 
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+		printf("fatigue : %f\n", player.fatigue);
+		player.fatigue -=.001;
 
 		drawWalls(renderer, walls, wall_count);
+
+		drawCockPit(renderer, player);
 		movePlayer(&player);
 		drawPlayer(renderer, player);
 		updateEffects(&effects); // Update animations
