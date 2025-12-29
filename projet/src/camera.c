@@ -52,6 +52,9 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
     float colW = (float)screenW / camera->fov;
     int thickness = (int)ceilf(colW);
     float maxDist = startOffset * raysOffestNumber;
+    float shade, disH, ca = 0;
+    int lineH, lineOff, wallX = 0;
+    int wallSize = 64;
 
     for(int r = 0; r<camera->fov; r++){
         angleX = cosf(startAngle + DEG2RAD(1)*(r+1));
@@ -61,9 +64,9 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
         {
             end = CreateVector(camera->position.x + angleX * (startOffset * (i+1)),camera->position.y + angleY * (startOffset * (i+1)));
 
-            for (int i = 0; i < wallNumber; i++)
+            for (int j = 0; j < wallNumber; j++)
             {
-                hasHit = LineRectIntersect(camera->position, end, &walls[i], &hit);
+                hasHit = LineRectIntersect(camera->position, end, &walls[j], &hit);
                 if (hasHit)
                 {
                     end.x = hit.x;
@@ -74,10 +77,10 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
             if (hasHit)
             {
                 /* ---------- DISTANCE ---------- */
-                float disH = Distance(camera->position, end);
+                disH = Distance(camera->position, end);
 
                 /* ---------- FIX FISHEYE ---------- */
-                float ca = camera->radiant - (startAngle + DEG2RAD(1) * (r + 1));
+                ca = camera->radiant - (startAngle + DEG2RAD(1) * (r + 1));
 
                 /* normalisation angle */
                 if (ca < 0) ca += 2 * M_PI;
@@ -86,24 +89,22 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
                 // disH = disH * cosf(ca);
 
                 /* ---------- HAUTEUR DU MUR ---------- */
-                int lineH = (64*screenH) / disH;
+                lineH = (wallSize*screenH) / disH;
                 if (lineH > screenH) lineH = screenH;
 
                 /* ---------- OFFSET VERTICAL ---------- */
-                int lineOff = (screenH / 2) - (lineH / 2);
+                lineOff = (screenH / 2) - (lineH / 2);
 
                 /* ---------- POSITION X DU RAYON ---------- */
-                int wallX = (int)(r * colW);
+                wallX = (int)(r * colW);
 
                 /* ---------- COULEUR ---------- */
-                float shade = 1.0f - (disH / maxDist);
+                shade = 1.0f - (disH / maxDist);
 
                 if (shade < 0.1f) shade = 0.1f;
                 if (shade > 1.0f) shade = 1.0f;
 
-                Uint8 color = (Uint8)(255 * shade);
-                printf("color %d\n", color);
-                SDL_SetRenderDrawColor(renderer3D, color, 0, 0, 255);
+                SDL_SetRenderDrawColor(renderer3D, (255 * shade), 0, 0, 255);
 
                 /* ---------- ÉPAISSEUR (équivalent glLineWidth(8)) ---------- */
                 for (int w = 0; w < 8; w++)
@@ -111,9 +112,9 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
                     SDL_RenderDrawLine(
                         renderer3D,
                         wallX + w,
-                        lineOff,
+                        lineOff - wallSize,
                         wallX + w,
-                        lineOff + lineH
+                        lineOff + lineH - wallSize
                     );
                 }
                 break;
