@@ -1,92 +1,84 @@
 #include "minimap.h"
+#include "map.h"
 #include <math.h>
 
 #define MM_WIDTH 200
 #define MM_HEIGHT 150
-#define MM_SCALE 0.4f
+#define MM_SCALE 0.25f
 
 int explosion = 1;
-// ... (previous includes)
 
-void drawMinimap(SDL_Renderer *renderer, Player player, SDL_Rect *walls, int wall_count, EffectManager *effects)
+void drawMinimap(SDL_Renderer *renderer, Player player, EffectManager *effects)
 {
-    // 1. Définir la zone de la minimap
     int viewW, viewH;
     SDL_GetRendererOutputSize(renderer, &viewW, &viewH);
-    
-    SDL_Rect mmRect = {
-        750, 
-        viewH - 165,
-        MM_WIDTH, 
-        MM_HEIGHT
-    };
 
-    // 2. Fond et cadre
-    // Fond noir semi-transparent si possible, sinon noir opaque
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_Rect mmRect = { 750, viewH - 165, MM_WIDTH, MM_HEIGHT };
+
+    // Background and frame
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
     SDL_RenderFillRect(renderer, &mmRect);
-    
-    // Cadre gris
     SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255);
     SDL_RenderDrawRect(renderer, &mmRect);
 
-    // 3. Clipping
     SDL_RenderSetClipRect(renderer, &mmRect);
 
     int cx = mmRect.x + mmRect.w / 2;
     int cy = mmRect.y + mmRect.h / 2;
 
-    // 4. Murs
-    // On utilise une couleur bien visible (ex: Gris clair ou Cyan)
-    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-
     float px = player.pos.x;
     float py = player.pos.y;
 
-    for(int i = 0; i < wall_count; i++) {
-        SDL_Rect w = walls[i];
-        
-        // Position relative au joueur
-        float rx = (w.x - px) * MM_SCALE;
-        float ry = (w.y - py) * MM_SCALE;
-        float rw = w.w * MM_SCALE;
-        float rh = w.h * MM_SCALE;
+    int mapW = getMapWidth();
+    int mapH = getMapHeight();
+    int cellSize = getMapCellSize();
 
-        SDL_Rect drawW = {
-            (int)(cx + rx),
-            (int)(cy + ry),
-            (int)ceilf(rw), // Assure au moins 1px si > 0
-            (int)ceilf(rh)
-        };
-        
-        // Dessin du mur plein
-        SDL_RenderFillRect(renderer, &drawW);
+    // Draw cells relative to player
+    for (int y = 0; y < mapH; y++) {
+        for (int x = 0; x < mapW; x++) {
+            int v = getMapCell(x, y);
+            if (v <= 0) continue; // skip roads
+
+            int worldX = x * cellSize;
+            int worldY = y * cellSize;
+
+            float rx = (worldX - px) * MM_SCALE;
+            float ry = (worldY - py) * MM_SCALE;
+
+            SDL_Rect drawR = {
+                (int)roundf(cx + rx),
+                (int)roundf(cy + ry),
+                (int)ceilf(cellSize * MM_SCALE),
+                (int)ceilf(cellSize * MM_SCALE)
+            };
+
+            if (v == 1) {
+                SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+                SDL_RenderFillRect(renderer, &drawR);
+            } else if (v == 2) {
+                SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
+                SDL_Rect t = { drawR.x + drawR.w/4, drawR.y + drawR.h/4, drawR.w/2, drawR.h/2 };
+                SDL_RenderFillRect(renderer, &t);
+            } else if (v == 3) {
+                SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
+                SDL_RenderFillRect(renderer, &drawR);
+            }
+        }
     }
 
-    // 5. Explosions sur la minimap
-    
-
-    // 6. Joueur (Texture voiture)
-    // Taille scalée
+    // Player icon at center
     float pw = player.position.w * MM_SCALE;
     float ph = player.position.h * MM_SCALE;
-    
-    // Destination rect centrée
-    SDL_Rect pDest = {
-        (int)(cx - pw / 2),
-        (int)(cy - ph / 2),
-        (int)pw,
-        (int)ph
-    };
+    SDL_Rect pDest = { (int)(cx - pw / 2), (int)(cy - ph / 2), (int)pw, (int)ph };
 
     if (effects)
     {
-        if(explosion && player.tesMort){
+        if (explosion && player.tesMort) {
             addExplosion(effects, pDest.x, pDest.y);
             explosion = 0;
         }
     }
-    // On utilise la texture du joueur avec rotation
+
     if (player.texture) {
         SDL_RenderCopyEx(renderer, player.texture, NULL, &pDest, player.angle, NULL, SDL_FLIP_NONE);
     } else {
@@ -94,10 +86,7 @@ void drawMinimap(SDL_Renderer *renderer, Player player, SDL_Rect *walls, int wal
         SDL_RenderFillRect(renderer, &pDest);
     }
 
-    // 7. Fin Clipping
     SDL_RenderSetClipRect(renderer, NULL);
-    
-    // Petit cadre de finition par dessus
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &mmRect);
 }
