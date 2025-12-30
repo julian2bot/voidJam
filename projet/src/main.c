@@ -17,6 +17,9 @@
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
 
+static const SDL_Keycode konami_seq[] = { SDLK_UP, SDLK_UP, SDLK_DOWN, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, SDLK_LEFT, SDLK_RIGHT, SDLK_b, SDLK_a };
+#define KONAMI_LEN (sizeof(konami_seq) / sizeof(konami_seq[0]))
+
 // Creation de la fenetre et du canvas de la fenetre
 int init(SDL_Window **window, SDL_Renderer **renderer)
 {
@@ -98,6 +101,21 @@ int main(int argc, char *argv[])
 			case SDL_KEYDOWN:
 				// printf("touche %c\n", event.key.keysym.sym);
 				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
+				// Konami code detection
+				if (!player.codeKonami) {
+					SDL_Keycode k = event.key.keysym.sym;
+					if (k == konami_seq[player.konami_index]) {
+						player.konami_index++;
+						if (player.konami_index == KONAMI_LEN) {
+							player.codeKonami = true;
+							player.konami_index = 0;
+							printf("Konami code activated!\n");
+						}
+					} else {
+						if (k == konami_seq[0]) player.konami_index = 1;
+						else player.konami_index = 0;
+					}
+				}
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				if (event.button.button == SDL_BUTTON_LEFT)

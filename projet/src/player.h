@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <math.h>
+#include <stdbool.h>
 #include "gestionSDL.h"
 #include "effects.h"
 #include "musicPlayer.h"
@@ -34,7 +35,9 @@ typedef struct player
     float fatigue;
     float wheelAngle;     // angle du volant
     float wheelVelocity;  // inertie du volant
-    int tesMort;
+    int konami_index;
+    bool codeKonami;
+    bool tesMort;
 } Player;
 
 Player initPlayer(SDL_Renderer *renderer);

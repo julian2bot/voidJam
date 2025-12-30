@@ -6,7 +6,7 @@ Player initPlayer(SDL_Renderer *renderer)
 {
 	SDL_Rect position = {100, 100, 30, 20};
 	SDL_FPoint point = {position.x, position.y};
-	Player player = {point, position, 90, NULL, .4, FATIGUE_MAX, 0};
+	Player player = {point, position, 90, NULL, .4, FATIGUE_MAX, 0, false, 0};
 
 	SDL_Texture *rectTexture = getTextureFromImage("voiture.png", renderer);
 
@@ -116,7 +116,7 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, S
 
     drawMinimap(renderer, player, effects);
 
-    if(player.tesMort) drawMirror(renderer);
+    if (player.tesMort && player.codeKonami) drawMirror(renderer);
 }
 
 void drawMirror(SDL_Renderer* renderer)
