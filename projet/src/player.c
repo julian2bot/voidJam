@@ -1,5 +1,6 @@
 #include "player.h"
 #include "minimap.h"
+#include "video.h"
 
 Player initPlayer(SDL_Renderer *renderer)
 {
@@ -94,6 +95,7 @@ void gameOver(Player *player)
 {
 	player->vitesse = 0;
 	player->tesMort = 1;
+
 }
 
 void destroyPlayer(Player p)
@@ -111,8 +113,27 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, S
     drawSteeringWheel(renderer, player);
     drawMusicPlayer(renderer, playerUI);
     drawPlaylistOverlay(renderer, playerUI);
+
     drawMinimap(renderer, player, effects);
+
+    if(player.tesMort) drawMirror(renderer);
 }
+
+void drawMirror(SDL_Renderer* renderer)
+{
+    // Draw rearview mirror (top-center)
+    int mirrorW = 240;
+    int mirrorH = 100;
+    SDL_Rect mirrorRect = { SCREEN_WIDTH/2 - mirrorW/2, 20, mirrorW, mirrorH };
+
+    SDL_Rect supportMirrorRect = { SCREEN_WIDTH/2 - 10, 0, 20, 20 };
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
+    SDL_RenderFillRect(renderer, &supportMirrorRect);
+
+    if (!video_is_playing()) video_play();
+    video_update_and_render(renderer, mirrorRect);
+}
+
 
 void drawSteeringWheel(SDL_Renderer *renderer, Player player)
 {

@@ -59,5 +59,6 @@ void drawArc(SDL_Renderer *r, int cx, int cy, int radius, float aStart, float aE
 void drawSpeedTicks(SDL_Renderer *r, int cx, int cy);
 void drawFatigueArc(SDL_Renderer *r, int cx, int cy, int r1, int r2, float aStart, float aEnd);
 void drawFatigueTicks(SDL_Renderer *r, int cx, int cy);
+void drawMirror(SDL_Renderer* renderer);
 
 #endif

@@ -12,6 +12,7 @@
 #include "effects.h"
 #include "camera.h"
 #include "audio.h"
+#include "video.h"
 
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
@@ -58,15 +59,20 @@ int main(int argc, char *argv[])
 	EffectManager effects = initEffects(renderer);
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
-	// initialize audio from folder (expects .ogg files)
-	if (!audio_init_dir("assets/music")) {
+ 	if (!audio_init_dir("assets/music")) {
 		fprintf(stderr, "Warning: no audio tracks loaded from assets/music\n");
 	}
 
 	MusicPlayer playerUI = initMusicPlayer();
 
-	// Initialize map grid and walls (cell size 64)
-	initMap(64);
+ 	initMap(64);
+
+ 	int vf = video_init_dir(renderer, "assets/videos/crash", 24);
+	if (vf <= 0) {
+		fprintf(stderr, "Note: no video frames found in assets/videos/crash\n");
+	} else {
+		fprintf(stderr, "Loaded %d video frames for crash video\n", vf);
+	}
 
 	Camera camera = CreateCamera(CreateVector(player.pos.x, player.pos.y), player.angle, 60);
 
@@ -123,7 +129,8 @@ int main(int argc, char *argv[])
 	destroyPlayer(player);
 	destroyEffects(&effects);
 
-    audio_quit();
+	video_quit();
+	audio_quit();
 
 	SDL_DestroyWindow(mafenetre);
 	TTF_Quit();
