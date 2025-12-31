@@ -43,7 +43,7 @@ void drawMusicPlayer(SDL_Renderer *renderer, MusicPlayer *playerUI)
     // -------------------------------
     // Volume knob à gauche
     // -------------------------------
-    int knobCx = body.x + 40;
+    int knobCx = body.x + 70;
     int knobCy = body.y + 50;
     int knobR  = 25;
     playerUI->volumeKnob = (SDL_Rect){knobCx - knobR, knobCy - knobR, knobR*2, knobR*2};
@@ -113,15 +113,51 @@ void drawMusicPlayer(SDL_Renderer *renderer, MusicPlayer *playerUI)
     int cdY = body.y + body.h - cdHeight - 10;
     playerUI->cdSlot = (SDL_Rect){cdX, cdY, cdWidth, cdHeight};
 
+    // Slot CD (fond)
     SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
     SDL_RenderFillRect(renderer, &playerUI->cdSlot);
 
+    // Trou du CD (rectangle intérieur)
+    SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
+    SDL_Rect cdEmplacement = {
+        playerUI->cdSlot.x + 10,
+        playerUI->cdSlot.y + 10,
+        playerUI->cdSlot.w - 20,
+        playerUI->cdSlot.h - 20
+    };
+
+    SDL_RenderFillRect(renderer, &cdEmplacement);
+
     // -------------------------------
-    // Power button en haut à gauche
+    // Power button en haut à gauche (circular)
     // -------------------------------
-    playerUI->powerButton = (SDL_Rect){body.x + 10, body.y + 10, 30, 30};
-    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &playerUI->powerButton);
+    int powerX = body.x + 25;
+    int powerY = body.y + 25;
+    int powerR = 15;
+    playerUI->powerButton = (SDL_Rect){powerX - powerR, powerY - powerR, powerR*2, powerR*2};
+
+    // Contour marqué
+    SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
+    // SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    drawRing(renderer, powerX, powerY, 0, powerR + 2);
+
+    // Cercle gris
+    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+    drawRing(renderer, powerX, powerY, 0, powerR);
+
+
+    // Logo power: demi-cercle avec trait
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    drawRing(renderer, powerX, powerY, powerR/2, powerR/2);
+
+    // cache cercle pour le trait power
+    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+    // SDL_RenderDrawLine(renderer, powerX-2, powerY-10, powerX+2, powerY+5);
+    SDL_RenderFillRect(renderer, &(SDL_Rect){powerX-4, powerY-10, 9,10});
+    // trait icon power 
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawLine(renderer, powerX, powerY - 10, powerX, powerY + 2);
 }
 
 // -------------------------------

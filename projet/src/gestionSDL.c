@@ -80,6 +80,7 @@ void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2)
         SDL_RenderDrawLine(r, x1, y1, x2, y2);
     }
 }
+
  void drawPrevIcon(SDL_Renderer *renderer, SDL_Rect r)
 {
     int cx = r.x + r.w / 2;

@@ -38,7 +38,7 @@ void movePlayer(Player *player)
 }
 
 void updatePlayer(Player *player, int turnLeft, int turnRight,
-                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects)
+                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer *playerUI)
 {
 	
 	SDL_Rect intersect;
@@ -49,6 +49,20 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 		gameOver(player);
 		return;
 	}
+
+    if(player->fatigue < 0){
+        gameOver(player);
+    }
+
+    // todo gestion de la fatigue
+    if(playerUI->power){
+        if(player->fatigue < FATIGUE_MAX){
+            player->fatigue +=.001;
+        }
+    }else{
+        player->fatigue -=.001;
+    }
+    printf("fatigue : %f\n", player->fatigue);
 
 	updateSteering(player, turnLeft, turnRight, DELTA_TIME);
 
@@ -380,5 +394,14 @@ void drawFatigueTicks(SDL_Renderer *r, int cx, int cy)
         int y2 = cy + sinf(angle) * r2;
 
         drawThickLine(r, x1, y1, x2, y2, 2);
+    }
+}
+
+void gestionFatigue(Player* player, float fatigueQuantity)
+{
+    
+    float newFatigue = player->fatigue + fatigueQuantity;
+    if(newFatigue <= FATIGUE_MAX && newFatigue >= FATIGUE_MIN){
+        player->fatigue = newFatigue;
     }
 }

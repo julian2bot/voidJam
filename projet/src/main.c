@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 		SDL_RenderClear(renderer);
 
 
-		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects);
+		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects, &playerUI);
 
 
 		// Boucle principale
@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
 			case SDL_KEYDOWN:
 				// printf("touche %c\n", event.key.keysym.sym);
 				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
+				if (event.key.keysym.sym == SDLK_UP) gestionFatigue(&player, .5 );
+				if (event.key.keysym.sym == SDLK_DOWN) gestionFatigue(&player, -.5 );
 				// Konami code detection
 				if (!player.codeKonami) {
 					SDL_Keycode k = event.key.keysym.sym;
@@ -133,8 +135,8 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		// printf("fatigue : %f\n", player.fatigue);
-		player.fatigue -=.001;
+
+
 		CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
 
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);

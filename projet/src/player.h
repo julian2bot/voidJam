@@ -44,7 +44,7 @@ Player initPlayer(SDL_Renderer *renderer);
 void drawPlayer(SDL_Renderer *renderer, Player player);
 void movePlayer(Player *player);
 void destroyPlayer(Player p);
-void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects);
+void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer* PlayerUI);
 int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *intersection);
 void gameOver(Player *player);
 void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer *playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects);
@@ -57,6 +57,7 @@ static void drawNeedle(SDL_Renderer *renderer, int cx, int cy, int length, float
 static void drawDashboard(SDL_Renderer *renderer);
 void drawThickLine(SDL_Renderer *r, int x1, int y1, int x2, int y2, int thickness);
 void updateSteering(Player *player, int left, int right, float dt);
+void gestionFatigue(Player* player, float fatigueQuantity);
 
 void drawArc(SDL_Renderer *r, int cx, int cy, int radius, float aStart, float aEnd);
 void drawSpeedTicks(SDL_Renderer *r, int cx, int cy);
