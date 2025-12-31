@@ -19,6 +19,7 @@ typedef struct MusicPlayer
     char currentTrack[64];
     float volumeAngle; // rotation pour volume knob
     int showPlaylist; // 0 = hidden, 1 = visible
+    int power;
 } MusicPlayer;
 
 MusicPlayer initMusicPlayer();

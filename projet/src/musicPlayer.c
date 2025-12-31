@@ -19,6 +19,7 @@ MusicPlayer initMusicPlayer()
     playerUI.currentTrack[sizeof(playerUI.currentTrack)-1] = '\0';
     playerUI.volumeAngle = 0.0f;
     playerUI.showPlaylist = 0;
+    playerUI.power = 0;
     return playerUI;
 }
 
@@ -132,8 +133,13 @@ void handleMusicPlayerClick(int mouseX, int mouseY, MusicPlayer *playerUI)
 
     if(SDL_PointInRect(&p, &playerUI->powerButton))
     {
-        // printf("Power toggled!\n");
-        audio_play(0);
+        playerUI->power = !playerUI->power;
+        printf("Power toggled! %d\n", playerUI->power);
+        if(playerUI->power){
+            audio_play(0);
+        }else{
+            audio_pause_toggle();
+        }
     }
     else if(SDL_PointInRect(&p, &playerUI->cdSlot))
     {

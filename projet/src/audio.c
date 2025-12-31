@@ -69,11 +69,8 @@ int audio_init_dir(const char *musicDir)
         }
     closedir(d);
 
-    if(track_count > 0) {
-        current_index = 0;
+    if (track_count > 0) {
         Mix_VolumeMusic((int)(MIX_MAX_VOLUME * current_volume));
-        Mix_PlayMusic(tracks[current_index].music, -1);
-        is_paused = 0;
         return 1;
     }
     return 0;

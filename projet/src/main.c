@@ -68,6 +68,11 @@ int main(int argc, char *argv[])
 
 	MusicPlayer playerUI = initMusicPlayer();
 
+	// Start playback only if UI power is on
+	if (audio_get_track_count() > 0 && playerUI.power) {
+		audio_play(0);
+	}
+
  	initMap(64);
 
  	int vf = video_init_dir(renderer, "assets/videos/crash", 24);
