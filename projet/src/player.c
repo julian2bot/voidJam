@@ -54,14 +54,8 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
         gameOver(player);
     }
 
-    // todo gestion de la fatigue
-    if(playerUI->power){
-        if(player->fatigue < FATIGUE_MAX){
-            player->fatigue +=.001;
-        }
-    }else{
-        player->fatigue -=.001;
-    }
+    // gestion de la fatigue via helper
+    updatePlayerFatigue(player, playerUI);
     printf("fatigue : %f\n", player->fatigue);
 
 	updateSteering(player, turnLeft, turnRight, DELTA_TIME);
@@ -130,6 +124,9 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, S
 
     drawMinimap(renderer, player, effects);
 
+    // overlay representing eyes closing as fatigue increases
+    drawFatigueOverlay(renderer, player);
+
     if (player.tesMort && player.codeKonami) drawMirror(renderer);
 }
 
@@ -146,6 +143,42 @@ void drawMirror(SDL_Renderer* renderer)
 
     if (!video_is_playing()) video_play();
     video_update_and_render(renderer, mirrorRect);
+}
+
+// update fatigue 
+void updatePlayerFatigue(Player *player, MusicPlayer *playerUI)
+{
+    if (!player || !playerUI) return;
+    float delta = playerUI->power ? 0.001f : -0.001f;
+    player->fatigue += delta;
+    if (player->fatigue > FATIGUE_MAX) player->fatigue = FATIGUE_MAX;
+}
+
+// draw an overlay that simulates eyes closing when tired
+void drawFatigueOverlay(SDL_Renderer *renderer, Player player)
+{
+    float range = (FATIGUE_MAX - FATIGUE_MIN);
+    float norm = (player.fatigue - FATIGUE_MIN) / (range > 0.0f ? range : 1.0f);
+    if (norm < 0.0f) norm = 0.0f;
+    if (norm > 1.0f) norm = 1.0f;
+    // tiredness: 0 = alert, 1 = very tired
+    float tired = 1.0f - norm;
+    if (tired <= 0.01f) return;
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+    Uint8 softAlpha = (Uint8)(tired * 80.0f);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, softAlpha);
+    SDL_Rect full = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_RenderFillRect(renderer, &full);
+
+    int eyelid_h = (int)(tired * (SCREEN_HEIGHT / 2));
+    Uint8 eyelidAlpha = (Uint8)(tired * 220.0f);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, eyelidAlpha);
+    SDL_Rect top = {0, 0, SCREEN_WIDTH, eyelid_h};
+    SDL_Rect bottom = {0, SCREEN_HEIGHT - eyelid_h, SCREEN_WIDTH, eyelid_h};
+    SDL_RenderFillRect(renderer, &top);
+    SDL_RenderFillRect(renderer, &bottom);
 }
 
 

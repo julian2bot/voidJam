@@ -58,6 +58,8 @@ static void drawDashboard(SDL_Renderer *renderer);
 void drawThickLine(SDL_Renderer *r, int x1, int y1, int x2, int y2, int thickness);
 void updateSteering(Player *player, int left, int right, float dt);
 void gestionFatigue(Player* player, float fatigueQuantity);
+void updatePlayerFatigue(Player *player, MusicPlayer *playerUI);
+void drawFatigueOverlay(SDL_Renderer *renderer, Player player);
 
 void drawArc(SDL_Renderer *r, int cx, int cy, int radius, float aStart, float aEnd);
 void drawSpeedTicks(SDL_Renderer *r, int cx, int cy);
