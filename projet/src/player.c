@@ -1,11 +1,12 @@
 #include "player.h"
 #include "minimap.h"
+#include "video.h"
 
 Player initPlayer(SDL_Renderer *renderer)
 {
 	SDL_Rect position = {100, 100, 30, 20};
 	SDL_FPoint point = {position.x, position.y};
-	Player player = {point, position, 90, NULL, .4, FATIGUE_MAX, 0};
+	Player player = {point, position, 90, NULL, .4, FATIGUE_MAX, 0, false, 0};
 
 	SDL_Texture *rectTexture = getTextureFromImage("voiture.png", renderer);
 
@@ -37,7 +38,7 @@ void movePlayer(Player *player)
 }
 
 void updatePlayer(Player *player, int turnLeft, int turnRight,
-                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects)
+                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer *playerUI)
 {
 	
 	SDL_Rect intersect;
@@ -48,6 +49,14 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 		gameOver(player);
 		return;
 	}
+
+    if(player->fatigue < 0){
+        gameOver(player);
+    }
+
+    // gestion de la fatigue via helper
+    updatePlayerFatigue(player, playerUI);
+    printf("fatigue : %f\n", player->fatigue);
 
 	updateSteering(player, turnLeft, turnRight, DELTA_TIME);
 
@@ -94,6 +103,7 @@ void gameOver(Player *player)
 {
 	player->vitesse = 0;
 	player->tesMort = 1;
+
 }
 
 void destroyPlayer(Player p)
@@ -110,8 +120,67 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, S
     drawFatigueGauge(renderer, player);
     drawSteeringWheel(renderer, player);
     drawMusicPlayer(renderer, playerUI);
+    drawPlaylistOverlay(renderer, playerUI);
+
     drawMinimap(renderer, player, effects);
+
+    // overlay representing eyes closing as fatigue increases
+    drawFatigueOverlay(renderer, player);
+
+    if (player.tesMort && player.codeKonami) drawMirror(renderer);
 }
+
+void drawMirror(SDL_Renderer* renderer)
+{
+    // Draw rearview mirror (top-center)
+    int mirrorW = 240;
+    int mirrorH = 100;
+    SDL_Rect mirrorRect = { SCREEN_WIDTH/2 - mirrorW/2, 20, mirrorW, mirrorH };
+
+    SDL_Rect supportMirrorRect = { SCREEN_WIDTH/2 - 10, 0, 20, 20 };
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
+    SDL_RenderFillRect(renderer, &supportMirrorRect);
+
+    if (!video_is_playing()) video_play();
+    video_update_and_render(renderer, mirrorRect);
+}
+
+// update fatigue 
+void updatePlayerFatigue(Player *player, MusicPlayer *playerUI)
+{
+    if (!player || !playerUI) return;
+    float delta = playerUI->power ? 0.001f : -0.001f;
+    player->fatigue += delta;
+    if (player->fatigue > FATIGUE_MAX) player->fatigue = FATIGUE_MAX;
+}
+
+// draw an overlay that simulates eyes closing when tired
+void drawFatigueOverlay(SDL_Renderer *renderer, Player player)
+{
+    float range = (FATIGUE_MAX - FATIGUE_MIN);
+    float norm = (player.fatigue - FATIGUE_MIN) / (range > 0.0f ? range : 1.0f);
+    if (norm < 0.0f) norm = 0.0f;
+    if (norm > 1.0f) norm = 1.0f;
+    // tiredness: 0 = alert, 1 = very tired
+    float tired = 1.0f - norm;
+    if (tired <= 0.01f) return;
+
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+    Uint8 softAlpha = (Uint8)(tired * 80.0f);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, softAlpha);
+    SDL_Rect full = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    SDL_RenderFillRect(renderer, &full);
+
+    int eyelid_h = (int)(tired * (SCREEN_HEIGHT / 2));
+    Uint8 eyelidAlpha = (Uint8)(tired * 220.0f);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, eyelidAlpha);
+    SDL_Rect top = {0, 0, SCREEN_WIDTH, eyelid_h};
+    SDL_Rect bottom = {0, SCREEN_HEIGHT - eyelid_h, SCREEN_WIDTH, eyelid_h};
+    SDL_RenderFillRect(renderer, &top);
+    SDL_RenderFillRect(renderer, &bottom);
+}
+
 
 void drawSteeringWheel(SDL_Renderer *renderer, Player player)
 {
@@ -358,5 +427,14 @@ void drawFatigueTicks(SDL_Renderer *r, int cx, int cy)
         int y2 = cy + sinf(angle) * r2;
 
         drawThickLine(r, x1, y1, x2, y2, 2);
+    }
+}
+
+void gestionFatigue(Player* player, float fatigueQuantity)
+{
+    
+    float newFatigue = player->fatigue + fatigueQuantity;
+    if(newFatigue <= FATIGUE_MAX && newFatigue >= FATIGUE_MIN){
+        player->fatigue = newFatigue;
     }
 }

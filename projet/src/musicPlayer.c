@@ -1,4 +1,6 @@
 #include "musicPlayer.h"
+#include "audio.h"
+#include <string.h>
 
 MusicPlayer initMusicPlayer()
 {
@@ -11,8 +13,13 @@ MusicPlayer initMusicPlayer()
     playerUI.pauseButton = (SDL_Rect){640, SCREEN_HEIGHT-90, 20, 20};
     playerUI.nextButton  = (SDL_Rect){670, SCREEN_HEIGHT-90, 20, 20};
 
-    strcpy(playerUI.currentTrack, "Track 01 - Epic Song");
+    const char *title = audio_get_current_title();
+    if (title) strncpy(playerUI.currentTrack, title, sizeof(playerUI.currentTrack)-1);
+    else strcpy(playerUI.currentTrack, "(no track)");
+    playerUI.currentTrack[sizeof(playerUI.currentTrack)-1] = '\0';
     playerUI.volumeAngle = 0.0f;
+    playerUI.showPlaylist = 0;
+    playerUI.power = 0;
     return playerUI;
 }
 
@@ -36,7 +43,7 @@ void drawMusicPlayer(SDL_Renderer *renderer, MusicPlayer *playerUI)
     // -------------------------------
     // Volume knob à gauche
     // -------------------------------
-    int knobCx = body.x + 40;
+    int knobCx = body.x + 70;
     int knobCy = body.y + 50;
     int knobR  = 25;
     playerUI->volumeKnob = (SDL_Rect){knobCx - knobR, knobCy - knobR, knobR*2, knobR*2};
@@ -55,6 +62,12 @@ void drawMusicPlayer(SDL_Renderer *renderer, MusicPlayer *playerUI)
     // Nom de la musique à droite du volume
     // -------------------------------
     SDL_Color white = {255, 255, 255, 255};
+    // keep title in sync
+    const char *title = audio_get_current_title();
+    if (title) {
+        strncpy(playerUI->currentTrack, title, sizeof(playerUI->currentTrack)-1);
+        playerUI->currentTrack[sizeof(playerUI->currentTrack)-1] = '\0';
+    }
     drawText(renderer, NULL, &white, playerUI->currentTrack, knobCx + knobR + 20, knobCy - 10, 14);
 
     // -------------------------------
@@ -100,15 +113,51 @@ void drawMusicPlayer(SDL_Renderer *renderer, MusicPlayer *playerUI)
     int cdY = body.y + body.h - cdHeight - 10;
     playerUI->cdSlot = (SDL_Rect){cdX, cdY, cdWidth, cdHeight};
 
+    // Slot CD (fond)
     SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
     SDL_RenderFillRect(renderer, &playerUI->cdSlot);
 
+    // Trou du CD (rectangle intérieur)
+    SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
+    SDL_Rect cdEmplacement = {
+        playerUI->cdSlot.x + 10,
+        playerUI->cdSlot.y + 10,
+        playerUI->cdSlot.w - 20,
+        playerUI->cdSlot.h - 20
+    };
+
+    SDL_RenderFillRect(renderer, &cdEmplacement);
+
     // -------------------------------
-    // Power button en haut à gauche
+    // Power button en haut à gauche (circular)
     // -------------------------------
-    playerUI->powerButton = (SDL_Rect){body.x + 10, body.y + 10, 30, 30};
-    SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &playerUI->powerButton);
+    int powerX = body.x + 25;
+    int powerY = body.y + 25;
+    int powerR = 15;
+    playerUI->powerButton = (SDL_Rect){powerX - powerR, powerY - powerR, powerR*2, powerR*2};
+
+    // Contour marqué
+    SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
+    // SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    drawRing(renderer, powerX, powerY, 0, powerR + 2);
+
+    // Cercle gris
+    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+    drawRing(renderer, powerX, powerY, 0, powerR);
+
+
+    // Logo power: demi-cercle avec trait
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    drawRing(renderer, powerX, powerY, powerR/2, powerR/2);
+
+    // cache cercle pour le trait power
+    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+    // SDL_RenderDrawLine(renderer, powerX-2, powerY-10, powerX+2, powerY+5);
+    SDL_RenderFillRect(renderer, &(SDL_Rect){powerX-4, powerY-10, 9,10});
+    // trait icon power 
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderDrawLine(renderer, powerX, powerY - 10, powerX, powerY + 2);
 }
 
 // -------------------------------
@@ -120,29 +169,93 @@ void handleMusicPlayerClick(int mouseX, int mouseY, MusicPlayer *playerUI)
 
     if(SDL_PointInRect(&p, &playerUI->powerButton))
     {
-        printf("Power toggled!\n");
+        playerUI->power = !playerUI->power;
+        printf("Power toggled! %d\n", playerUI->power);
+        if(playerUI->power){
+            audio_play(0);
+        }else{
+            audio_pause_toggle();
+        }
     }
     else if(SDL_PointInRect(&p, &playerUI->cdSlot))
     {
-        printf("Insert CD\n");
+        // toggle playlist overlay
+        playerUI->showPlaylist = !playerUI->showPlaylist;
+        printf("Playlist toggled: %d\n", playerUI->showPlaylist);
+        return;
     }
     else if(SDL_PointInRect(&p, &playerUI->prevButton))
     {
-        printf("Previous track\n");
+        audio_prev();
+        const char *t = audio_get_current_title(); if (t) strncpy(playerUI->currentTrack, t, sizeof(playerUI->currentTrack)-1);
     }
     else if(SDL_PointInRect(&p, &playerUI->pauseButton))
     {
-        printf("Pause\n");
+        audio_pause_toggle();
     }
     else if(SDL_PointInRect(&p, &playerUI->nextButton))
     {
-        printf("Next track\n");
+        audio_next();
+        const char *t = audio_get_current_title(); if (t) strncpy(playerUI->currentTrack, t, sizeof(playerUI->currentTrack)-1);
     }
     else if(SDL_PointInRect(&p, &playerUI->volumeKnob))
     {
         // exemple de rotation simple
         playerUI->volumeAngle += 15.0f;
         if(playerUI->volumeAngle >= 360) playerUI->volumeAngle -= 360;
-        printf("Volume rotated: %.1f°\n", playerUI->volumeAngle);
+        // map angle to volume 0..1
+        float vol = (playerUI->volumeAngle) / 360.0f;
+        audio_set_volume(vol);
+        printf("Volume rotated: %.1f° -> %.2f\n", playerUI->volumeAngle, vol);
+    }
+
+    // If playlist visible, check clicks on playlist entries
+    if (playerUI->showPlaylist)
+    {
+        int count = audio_get_track_count();
+        if (count > 0)
+        {
+            // playlist area (mirror drawPlaylist): fixed for simplicity
+            SDL_Rect listRect = {450, 80, 300, 24 * count + 20};
+            if (SDL_PointInRect(&p, &listRect))
+            {
+                int relY = mouseY - listRect.y - 10;
+                int idx = relY / 24;
+                if (idx >= 0 && idx < count)
+                {
+                    audio_select(idx);
+                    const char *t = audio_get_current_title(); if (t) strncpy(playerUI->currentTrack, t, sizeof(playerUI->currentTrack)-1);
+                    playerUI->showPlaylist = 0; // close
+                    printf("Selected track %d\n", idx);
+                }
+            }
+        }
+    }
+}
+
+// Draw the playlist overlay (called from drawCockPit after drawMusicPlayer)
+void drawPlaylistOverlay(SDL_Renderer *renderer, MusicPlayer *playerUI)
+{
+    if (!playerUI->showPlaylist) return;
+    int count = audio_get_track_count();
+    if (count == 0) return;
+
+    SDL_Rect listRect = {450, 80, 300, 24 * count + 20};
+    SDL_SetRenderDrawColor(renderer, 20, 20, 20, 230);
+    SDL_RenderFillRect(renderer, &listRect);
+    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+    SDL_RenderDrawRect(renderer, &listRect);
+
+    SDL_Color white = {255,255,255,255};
+    for (int i = 0; i < count; i++) {
+        const char *t = audio_get_title_at(i);
+        SDL_Rect item = { listRect.x + 10, listRect.y + 10 + i*24, listRect.w - 20, 20 };
+        // highlight current
+        const char *cur = audio_get_current_title();
+        if (cur && t && strcmp(cur, t) == 0) {
+            SDL_SetRenderDrawColor(renderer, 60, 60, 120, 255);
+            SDL_RenderFillRect(renderer, &item);
+        }
+        drawText(renderer, NULL, &white, t ? t : "(untitled)", item.x+4, item.y+2, 14);
     }
 }
