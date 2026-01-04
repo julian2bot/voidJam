@@ -6,6 +6,7 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <math.h>
+#define DEG2RAD(x) ((x) * M_PI / 180.0f)
 
 SDL_Texture *getTextureFromImage(const char *nomPic, SDL_Renderer *renderer);
 void destroy_textures(unsigned int nb_textures, ...);

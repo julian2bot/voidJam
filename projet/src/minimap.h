@@ -6,6 +6,6 @@
 
 #include "effects.h"
 
-void drawMinimap(SDL_Renderer *renderer, Player player, SDL_Rect *walls, int wall_count, EffectManager *effects);
+void drawMinimap(SDL_Renderer *renderer, Player player, EffectManager *effects);
 
 #endif

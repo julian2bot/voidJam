@@ -12,10 +12,11 @@
 #include "effects.h"
 #include "camera.h"
 #include "button.h"
+#include "audio.h"
+#include "video.h"
 
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
-
 #define buttonWidth 200
 #define	buttonHeight 50
 
@@ -25,6 +26,10 @@ typedef enum State{
     GAME_OVER,
     EXIT
 }State;
+
+static const SDL_Keycode konami_seq[] = { SDLK_UP, SDLK_UP, SDLK_DOWN, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, SDLK_LEFT, SDLK_RIGHT, SDLK_b, SDLK_a };
+#define KONAMI_LEN (sizeof(konami_seq) / sizeof(konami_seq[0]))
+
 
 // Creation de la fenetre et du canvas de la fenetre
 int init(SDL_Window **window, SDL_Renderer **renderer)
@@ -54,7 +59,25 @@ int init(SDL_Window **window, SDL_Renderer **renderer)
 }
 
 State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Event event, EffectManager effects){
+ 	if (!audio_init_dir("assets/music")) {
+		fprintf(stderr, "Warning: no audio tracks loaded from assets/music\n");
+	}
+
 	MusicPlayer playerUI = initMusicPlayer();
+
+	// Start playback only if UI power is on
+	if (audio_get_track_count() > 0 && playerUI.power) {
+		audio_play(0);
+	}
+
+ 	initMap(64);
+
+ 	int vf = video_init_dir(renderer, "assets/videos/crash", 24);
+	if (vf <= 0) {
+		fprintf(stderr, "Note: no video frames found in assets/videos/crash\n");
+	} else {
+		fprintf(stderr, "Loaded %d video frames for crash video\n", vf);
+	}
 
 	Camera camera = CreateCamera(CreateVector(player.pos.x, player.pos.y), player.angle, 60);
 	int fin = 0;
@@ -63,8 +86,8 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // fond noir
 		SDL_RenderClear(renderer);
 
-		
-		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects);
+
+		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effects, &playerUI);
 
 
 		// Boucle principale
@@ -79,6 +102,23 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 			case SDL_KEYDOWN:
 				// printf("touche %c\n", event.key.keysym.sym);
 				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
+				if (event.key.keysym.sym == SDLK_UP) gestionFatigue(&player, .5 );
+				if (event.key.keysym.sym == SDLK_DOWN) gestionFatigue(&player, -.5 );
+				// Konami code detection
+				if (!player.codeKonami) {
+					SDL_Keycode k = event.key.keysym.sym;
+					if (k == konami_seq[player.konami_index]) {
+						player.konami_index++;
+						if (player.konami_index == KONAMI_LEN) {
+							player.codeKonami = true;
+							player.konami_index = 0;
+							printf("Konami code activated!\n");
+						}
+					} else {
+						if (k == konami_seq[0]) player.konami_index = 1;
+						else player.konami_index = 0;
+					}
+				}
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				if (event.button.button == SDL_BUTTON_LEFT)
@@ -91,19 +131,18 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 			}
 		}
 
-		// printf("fatigue : %f\n", player.fatigue);
-		player.fatigue -=.001;
-		CheckRays(&camera, 5, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
-		
+
+
+		CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
+
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// drawWalls(renderer, walls, wall_count);
 		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effects);
-
 		UpdateCameraPlayer(&camera, &player);
 		// drawPlayer(renderer, player);
 		updateEffects(&effects); // Update animations
 		drawEffects(&effects, renderer); // Draw them
-		
+
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16);
 	}
@@ -334,10 +373,13 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
-	
+
 	destroyPlayer(player);
 	destroyEffects(&effects);
-	
+
+	video_quit();
+	audio_quit();
+
 	SDL_DestroyWindow(mafenetre);
 	TTF_Quit();
 	SDL_Quit();
