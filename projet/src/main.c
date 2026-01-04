@@ -79,7 +79,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
  	initMap(64);
 
 	/* load item sprite (optional: place assets/cup.png) */
-	SDL_Texture *itemTexture = getTextureFromImage("cup.png", renderer);
+	SDL_Texture *itemTexture = getTextureFromImage("assets/cup.png", renderer);
 	if (!itemTexture) {
 		itemTexture = create_cup_texture(renderer);
 	}

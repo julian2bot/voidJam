@@ -102,7 +102,8 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
             shade = 1.0f - (disH / maxDist);
             if (shade < 0.1f) shade = 0.1f;
             if (shade > 1.0f) shade = 1.0f;
-            SDL_SetRenderDrawColor(renderer3D, (int)(255 * shade), 0, 0, 255);
+            Uint8 col = (Uint8)fmaxf(20.0f, 200.0f * shade);
+            SDL_SetRenderDrawColor(renderer3D, col, col, col, 255);
             for (int w = 0; w < 8; w++) {
                 SDL_RenderDrawLine(renderer3D, wallX + w, lineOff - wallSize, wallX + w, lineOff + lineH - wallSize);
             }
@@ -265,15 +266,15 @@ void CheckRaysGridDDA(Camera *camera, int screenW, int screenH, SDL_Renderer *re
             // Calcul de la distance exacte au mur
             float dist;
             if (side == 0) {
-                dist = (mapX - camera->position.x / wallSize + (1 - stepX) / 2) * wallSize / rayX;
-                SDL_SetRenderDrawColor(renderer3D, 40, 40, 40, 255);
+                dist = (mapX - camera->position.x / (float)wallSize + (1 - stepX) / 2.0f) * wallSize / rayX;
             } else {
-                dist = (mapY - camera->position.y / wallSize + (1 - stepY) / 2) * wallSize / rayY;
-                SDL_SetRenderDrawColor(renderer3D, 20, 20, 20, 255);
+                dist = (mapY - camera->position.y / (float)wallSize + (1 - stepY) / 2.0f) * wallSize / rayY;
             }
 
             // Correction du fish-eye
             float ca = camera->radiant - rayAngle;
+            if (ca < 0) ca += 2 * M_PI;
+            if (ca > 2 * M_PI) ca -= 2 * M_PI;
             dist *= cosf(ca);
 
             depth[r] = dist;
@@ -285,11 +286,13 @@ void CheckRaysGridDDA(Camera *camera, int screenW, int screenH, SDL_Renderer *re
             int lineOff = (screenH / 2) - (lineH / 2);
             int wallX = (int)(r * colW);
 
-            // float shade = 1.0f - fminf(dist / (MAP_W * wallSize), 1.0f);
-            // if (shade < 0.1f) shade = 0.1f;
+            float shade = 1.0f - fminf(dist / (MAP_W * wallSize), 1.0f);
+            if (shade < 0.1f) shade = 0.1f;
+            if (shade > 1.0f) shade = 1.0f;
+            Uint8 col = (Uint8)fmaxf(20.0f, 200.0f * shade);
 
-
-            for (int w = 0; w < MAP_W; w++) {
+            for (int w = 0; w < 8; w++) {
+                SDL_SetRenderDrawColor(renderer3D, col, col, col, 255);
                 SDL_RenderDrawLine(renderer3D,
                                    wallX + w,
                                    lineOff,
