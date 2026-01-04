@@ -13,21 +13,23 @@ SDL_Rect *walls = NULL;
 SDL_Rect items[10];
 Vector2 itemsPos[10];
 int wall_count = 0;
-int item_count = 0;
 static int currentCellSize = 64;
 
 void initMap(int cellSize)
 {
     if (cellSize <= 0) cellSize = 64;
+    for (int i = 0; i < item_count; i++)
+    {
+        placeRandomItem(i);
+    }
+    
     currentCellSize = cellSize;
 
     // Count walls (cells == 1)
     int count = 0;
-    int count_items = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
             if (grid[y][x] == 1) count++;
-            if (grid[y][x] == 9) count_items++;
         }
     }
 
@@ -40,7 +42,6 @@ void initMap(int cellSize)
 
     // Fill walls
     int idx = 0;
-    int idx2 = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
             if (grid[y][x] == 1) {
@@ -50,19 +51,10 @@ void initMap(int cellSize)
                 walls[idx].h = cellSize;
                 idx++;
             }
-            if (grid[y][x] == 9) {
-                items[idx2].x = x * cellSize;
-                items[idx2].y = y * cellSize;
-                items[idx2].w = cellSize;
-                items[idx2].h = cellSize;
-                itemsPos[idx2].x = x;
-                itemsPos[idx2].y = y;
-                idx2++;
-            }
+            
         }
     }
     wall_count = idx;
-    item_count = idx2;
 }
 
 int getMapCell(int x, int y)
@@ -140,4 +132,54 @@ int setMapCell(int x, int y, int value)
     if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H_) return -1;
     grid[y][x] = value;
     return grid[y][x];
+}
+
+int placeRandomValue(int value) {
+    int tries = 0;
+    const int maxTries = 100; // éviter boucle infinie si la grille est pleine
+
+    while (tries < maxTries) {
+        int x = rand() % MAP_W;
+        int y = rand() % MAP_H_;
+
+        if (grid[y][x] == 0) {
+            grid[y][x] = value;
+            printf("Valeur %d placée en (%d, %d)\n", value, x, y);
+            return 1; // succès
+        }
+
+        tries++;
+    }
+
+    printf("Impossible de placer la valeur : grille pleine ?\n");
+    return 0; // échec
+}
+
+int placeRandomItem(int index) {
+    int tries = 0;
+    const int maxTries = 100; // éviter boucle infinie si la grille est pleine
+
+    while (tries < maxTries) {
+        int x = rand() % MAP_W;
+        int y = rand() % MAP_H_;
+
+        if (grid[y][x] == 0) {
+            grid[y][x] = 9;
+            printf("Valeur %d placée en (%d, %d)\n", 9, x, y);
+            items[index].x = x * currentCellSize;
+            items[index].y = y * currentCellSize;
+            items[index].w = currentCellSize;
+            items[index].h = currentCellSize;
+            itemsPos[index].x = x;
+            itemsPos[index].y = y;
+
+            return 1; // succès
+        }
+
+        tries++;
+    }
+
+    
+    printf("Impossible de placer la valeur : grille pleine ?\n");
+    return 0; // échec
 }

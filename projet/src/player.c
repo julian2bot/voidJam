@@ -56,17 +56,13 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 	{
         indexItemCol--;
 		printf("Collision item \n");
-        items[indexItemCol].x = 0;
-        items[indexItemCol].y = 0;
-        items[indexItemCol].w = 0;
-        items[indexItemCol].h = 0;
 
         Vector2 vec = itemsPos[indexItemCol];
-        // printf("%d, %d\n", (int)vec.y, (int)vec.x);
-        // grid[(int)vec.y][(int)vec.x] = 0;
-// /        printf("%d\n", grid[(int)vec.y][(int)vec.x]);
         setMapCell((int)vec.x,(int)vec.y,0);
-
+        
+        placeRandomItem(indexItemCol);
+      
+        gestionFatigue(player,1);
 		// gameOver(player);
 		// return;
 	}
@@ -492,9 +488,11 @@ void drawFatigueTicks(SDL_Renderer *r, int cx, int cy)
 
 void gestionFatigue(Player* player, float fatigueQuantity)
 {
-    
     float newFatigue = player->fatigue + fatigueQuantity;
-    if(newFatigue <= FATIGUE_MAX && newFatigue >= FATIGUE_MIN){
+    if(newFatigue <= FATIGUE_MAX){
+        newFatigue = FATIGUE_MAX;
+    }
+    if(newFatigue >= FATIGUE_MIN){
         player->fatigue = newFatigue;
     }
 }
