@@ -28,5 +28,9 @@ void addExplosion(EffectManager *manager, int x, int y);
 void updateEffects(EffectManager *manager);
 void drawEffects(EffectManager *manager, SDL_Renderer *renderer);
 void destroyEffects(EffectManager *manager);
+int effects_hasActiveExplosions(EffectManager *manager);
+/* Reset/clear all active explosions and their state */
+void reset_animation(EffectManager *manager);
+void reset_animation(EffectManager *manager);
 
 #endif

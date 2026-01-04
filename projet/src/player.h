@@ -68,5 +68,6 @@ void drawFatigueTicks(SDL_Renderer *r, int cx, int cy);
 void drawMirror(SDL_Renderer* renderer);
 void drawDistance(SDL_Renderer* renderer, float score);
 void drawEffetMort(SDL_Renderer *renderer, EffectManager * effectsMort);
+void reset_player_death_flags(void);
 
 #endif

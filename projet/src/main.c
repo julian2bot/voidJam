@@ -7,6 +7,7 @@
 #include <SDL_ttf.h>
 #include <time.h>
 #include "player.h"
+#include "minimap.h"
 #include "map.h"
 #include "gestionSDL.h"
 #include "effects.h"
@@ -82,7 +83,8 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 
 	Camera camera = CreateCamera(CreateVector(player.pos.x, player.pos.y), player.angle, 60);
 	int fin = 0;
-	while (!player.tesMort && !fin)
+	int endGame = 0;
+	while (!endGame && !fin)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // fond noir
 		SDL_RenderClear(renderer);
@@ -144,12 +146,23 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		drawEffetMort(renderer, &effectsMort);
 		updateEffects(&effectsMort);
 
+		// fin du jeur
+		if (player.tesMort && !effects_hasActiveExplosions(&effectsMort)) {
+			endGame = 1;
+		}
+
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16);
 	}
 	if(fin){
 		return EXIT;
 	}
+	reset_animation(&effectsMort);
+	reset_animation(&effectsMap);
+
+	reset_player_death_flags();
+	reset_minimap_explosion_flag();
+
 	return GAME_OVER;
 }
 

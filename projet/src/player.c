@@ -101,7 +101,12 @@ int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *interse
 	return 0;
 }
 
-int explosionMort = 1;
+static int explosionMort = 1;
+
+void reset_player_death_flags(void)
+{
+    explosionMort = 1;
+}
 void gameOver(Player *player, EffectManager *effects)
 {
 	player->vitesse = 0;
@@ -109,7 +114,7 @@ void gameOver(Player *player, EffectManager *effects)
     if (effects)
     {
         if (explosionMort && player->tesMort) {
-            addExplosion(effects, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2);
+            addExplosion(effects,  SCREEN_WIDTH / 2, SCREEN_HEIGHT - 280);
             explosionMort = 0;
         }
     }
