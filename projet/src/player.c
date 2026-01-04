@@ -1,6 +1,7 @@
 #include "player.h"
 #include "minimap.h"
 #include "video.h"
+#include "map.h"
 
 Player initPlayer(SDL_Renderer *renderer)
 {
@@ -38,15 +39,36 @@ void movePlayer(Player *player)
 }
 
 void updatePlayer(Player *player, int turnLeft, int turnRight,
-                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer *playerUI, float *score)
+                  int forward, int back, SDL_Rect *walls, int wall_count, SDL_Rect *items, int item_count, EffectManager *effects, MusicPlayer *playerUI, float *score)
 {
 	
 	SDL_Rect intersect;
+	SDL_Rect intersect2;
 	if(collision(player, walls, wall_count, &intersect))
 	{
 		// if(player->vitesse > 0) addExplosion(effects, intersect.x + intersect.w / 2, intersect.y + intersect.h / 2);
 		printf("Collision\n");
 		gameOver(player, effects);
+	}
+    
+    int indexItemCol = collision(player, items, item_count, &intersect2);
+    if(indexItemCol)
+	{
+        indexItemCol--;
+		printf("Collision item \n");
+        items[indexItemCol].x = 0;
+        items[indexItemCol].y = 0;
+        items[indexItemCol].w = 0;
+        items[indexItemCol].h = 0;
+
+        Vector2 vec = itemsPos[indexItemCol];
+        // printf("%d, %d\n", (int)vec.y, (int)vec.x);
+        // grid[(int)vec.y][(int)vec.x] = 0;
+// /        printf("%d\n", grid[(int)vec.y][(int)vec.x]);
+        setMapCell((int)vec.x,(int)vec.y,0);
+
+		// gameOver(player);
+		// return;
 	}
 
     // if(player->fatigue < 0){
@@ -55,7 +77,7 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 
     // gestion de la fatigue via helper
     updatePlayerFatigue(player, playerUI);
-    printf("fatigue : %f\n", player->fatigue);
+    // printf("fatigue : %f\n", player->fatigue);
 
 	updateSteering(player, turnLeft, turnRight, DELTA_TIME);
 
@@ -93,13 +115,15 @@ int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *interse
 {
 	for (int i = 0; i < wall_count; i++)
 	{
+        if(&walls[i]==NULL){continue;}
 		if (SDL_IntersectRect(&player->position, &walls[i], intersection))
 		{
-			return 1;
+			return i+1;
 		}
 	}
 	return 0;
 }
+
 
 static int explosionMort = 1;
 
@@ -107,6 +131,7 @@ void reset_player_death_flags(void)
 {
     explosionMort = 1;
 }
+
 void gameOver(Player *player, EffectManager *effects)
 {
 	player->vitesse = 0;

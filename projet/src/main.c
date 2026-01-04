@@ -65,6 +65,9 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		fprintf(stderr, "Warning: no audio tracks loaded from assets/music\n");
 	}
 
+	Vector2 posItem = {1,13};
+	ItemVisualisation item = {9, posItem};
+
 	MusicPlayer playerUI = initMusicPlayer();
 
 	// Start playback only if UI power is on
@@ -83,14 +86,15 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 
 	Camera camera = CreateCamera(CreateVector(player.pos.x, player.pos.y), player.angle, 60);
 	int fin = 0;
+	SDL_Rect roadRect = {0, tailleFenetreH/2, tailleFenetreW, tailleFenetreH/2}; 
 	int endGame = 0;
 	while (!endGame && !fin)
 	{
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // fond noir
+		SDL_SetRenderDrawColor(renderer, 17, 7, 82, 255); // fond bleu foncé
 		SDL_RenderClear(renderer);
 
 
-		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, &effectsMort, &playerUI, score);
+		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, items, item_count, &effectsMort, &playerUI, score);
 
 
 		// Boucle principale
@@ -136,8 +140,14 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 
 
 
-		CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
-
+		// CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
+		// CheckRaysGrid(&camera, 30, tailleFenetreW, tailleFenetreH, renderer);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderFillRect(renderer, &roadRect);
+		
+		CheckRaysGridDDA(&camera, tailleFenetreW, tailleFenetreH, renderer);
+		drawItem(&item, &camera, tailleFenetreW, tailleFenetreH, renderer);
+		
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// drawWalls(renderer, walls, wall_count);
 		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effectsMap, score);
@@ -154,6 +164,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16);
 	}
+	freeMap();
 	if(fin){
 		return EXIT;
 	}
