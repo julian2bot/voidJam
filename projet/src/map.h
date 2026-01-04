@@ -9,6 +9,8 @@
 
 extern SDL_Rect *walls;
 extern int wall_count;
+extern SDL_Rect *items;
+extern int item_count;
 
 void initMap(int cellSize);
 
@@ -17,6 +19,10 @@ int getMapCell(int x, int y);
 void drawMap(SDL_Renderer *renderer, int cellSize);
 
 void drawWalls(SDL_Renderer *renderer, SDL_Rect *wallsArr, int wall_count);
+
+/* Items helpers */
+SDL_Rect *getMapItems(void);
+int getMapItemCount(void);
 
 
 // Map helpers

@@ -15,6 +15,7 @@
 #include "button.h"
 #include "audio.h"
 #include "video.h"
+#include "items.h"
 
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
@@ -73,6 +74,12 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 	}
 
  	initMap(64);
+
+	/* load item sprite (optional: place assets/cup.png) */
+	SDL_Texture *itemTexture = getTextureFromImage("cup.png", renderer);
+	if (!itemTexture) {
+		itemTexture = create_cup_texture(renderer);
+	}
 
  	int vf = video_init_dir(renderer, "assets/videos/crash", 24);
 	if (vf <= 0) {
@@ -135,8 +142,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		}
 
 
-
-		CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
+		CheckRays(&camera, 20, walls, wall_count, getMapItems(), getMapItemCount(), tailleFenetreW, tailleFenetreH, renderer, itemTexture);
 
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// drawWalls(renderer, walls, wall_count);
@@ -155,6 +161,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		SDL_Delay(16);
 	}
 	if(fin){
+		if (itemTexture) SDL_DestroyTexture(itemTexture);
 		return EXIT;
 	}
 	reset_animation(&effectsMort);
@@ -163,6 +170,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 	reset_player_death_flags();
 	reset_minimap_explosion_flag();
 
+	if (itemTexture) SDL_DestroyTexture(itemTexture);
 	return GAME_OVER;
 }
 

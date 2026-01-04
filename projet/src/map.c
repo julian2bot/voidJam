@@ -27,6 +27,8 @@ static int grid[MAP_H_][MAP_W] = {
 
 SDL_Rect *walls = NULL;
 int wall_count = 0;
+SDL_Rect *items = NULL;
+int item_count = 0;
 static int currentCellSize = 64;
 
 void initMap(int cellSize)
@@ -63,6 +65,33 @@ void initMap(int cellSize)
         }
     }
     wall_count = idx;
+
+    // Count and fill items (cells == 2 or 3)
+    int icount = 0;
+    for (int y = 0; y < MAP_H_; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            if (grid[y][x] == 2 || grid[y][x] == 3) icount++;
+        }
+    }
+    if (items) free(items);
+    items = (SDL_Rect *)malloc(sizeof(SDL_Rect) * icount);
+    if (!items) {
+        item_count = 0;
+        return;
+    }
+    int j = 0;
+    for (int y = 0; y < MAP_H_; y++) {
+        for (int x = 0; x < MAP_W; x++) {
+            if (grid[y][x] == 2 || grid[y][x] == 3) {
+                items[j].x = x * cellSize;
+                items[j].y = y * cellSize;
+                items[j].w = cellSize;
+                items[j].h = cellSize;
+                j++;
+            }
+        }
+    }
+    item_count = j;
 }
 
 int getMapCell(int x, int y)
@@ -84,6 +113,16 @@ int getMapHeight(void)
 int getMapCellSize(void)
 {
     return currentCellSize;
+}
+
+SDL_Rect *getMapItems(void)
+{
+    return items;
+}
+
+int getMapItemCount(void)
+{
+    return item_count;
 }
 
 void drawMap(SDL_Renderer *renderer, int cellSize)
