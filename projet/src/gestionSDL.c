@@ -132,3 +132,26 @@ void drawRing(SDL_Renderer *r, int cx, int cy, int r1, int r2)
     SDL_RenderFillRect(renderer, &leftBar);
     SDL_RenderFillRect(renderer, &rightBar);
 }
+
+void drawCenteredText(SDL_Renderer *renderer, TTF_Font *font, SDL_Color color, const char *text, SDL_Rect container)
+{
+    if (!renderer || !font || !text)
+        return;
+
+    int textW, textH;
+    TTF_SizeText(font, text, &textW, &textH);
+
+    SDL_Surface *surface = TTF_RenderText_Solid(font, text, color);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+    SDL_Rect dst;
+    dst.w = textW;
+    dst.h = textH;
+    dst.x = container.x + (container.w - textW) / 2;
+    dst.y = container.y + (container.h - textH) / 2;
+
+    SDL_RenderCopy(renderer, texture, NULL, &dst);
+
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+}
