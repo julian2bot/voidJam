@@ -200,11 +200,16 @@ State MainMenu(SDL_Renderer *renderer, SDL_Event event){
 	return currentState;
 }
 
-State GameOverMenu(SDL_Renderer *renderer, SDL_Event event){
+State GameOverMenu(SDL_Renderer *renderer, SDL_Event event, int* score){
 	TTF_Font *font = TTF_OpenFont("time.ttf", 32);
 	TTF_Font *fontTitle = TTF_OpenFont("time.ttf", 100);
 
+	char strScore[35];
+	snprintf(strScore, sizeof(strScore), "Distance parcourue : %d m", *score);
+
+
 	SDL_Rect rectTitle = {0,20, tailleFenetreW, 50};
+	SDL_Rect rectScore = {0, tailleFenetreH/2 - buttonHeight/2 - 100, tailleFenetreW, 50};
 	SDL_Rect rectStart = {tailleFenetreW/2 - buttonWidth/2, tailleFenetreH/2 - buttonHeight/2, buttonWidth, buttonHeight};
 	SDL_Rect rectExit = {tailleFenetreW/2 - buttonWidth/2, tailleFenetreH/2 - buttonHeight/2 + 100, buttonWidth, buttonHeight};
 	SDL_Color white = {255,255,255,255};
@@ -281,6 +286,7 @@ State GameOverMenu(SDL_Renderer *renderer, SDL_Event event){
 			displayButton(&buttons[i], renderer, font);
 		}
 		drawCenteredText(renderer, fontTitle, white, "GAME OVER", rectTitle);
+		drawCenteredText(renderer, font, white, strScore, rectScore);
 
 		SDL_RenderPresent(renderer);
 	}
@@ -303,6 +309,8 @@ int main(int argc, char *argv[])
 	
 	int fin = 0;
 	State currentState = MAIN;
+	int score = 100;
+	int *scorePointer = &score;
 
 	while (!fin)
 	{
@@ -313,7 +321,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case GAME_OVER:
-				currentState = GameOverMenu(renderer, event);
+				currentState = GameOverMenu(renderer, event, scorePointer);
 				break;
 
 			case GAME:
