@@ -1,29 +1,13 @@
 #include "map.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
 
 // Grid map: 0 = road, 1 = wall, 2 = token, 3 = tree
 // Small example grid (mapWidth x mapHeight)
 #define MAP_W 20
 #define MAP_H_ 15
-
-static int grid[MAP_H_][MAP_W] = {
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
-    {1,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-    {1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
 
 SDL_Rect *walls = NULL;
 int wall_count = 0;
@@ -95,17 +79,29 @@ void drawMap(SDL_Renderer *renderer, int cellSize)
         for (int x = 0; x < MAP_W; x++) {
             int v = grid[y][x];
             SDL_Rect r = { x * cellSize, y * cellSize, cellSize, cellSize };
-            if (v == 1) {
-                SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
-                SDL_RenderFillRect(renderer, &r);
-            } else if (v == 2) {
-                SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
-                SDL_Rect t = { r.x + cellSize/4, r.y + cellSize/4, cellSize/2, cellSize/2 };
-                SDL_RenderFillRect(renderer, &t);
-            } else if (v == 3) {
-                SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
-                SDL_RenderFillRect(renderer, &r);
+            switch (v)
+            {
+                case 1:
+                    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+                    SDL_RenderFillRect(renderer, &r);
+                    break;
+                
+                case 9:
+                    printf("CAFE");
+                    SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
+                    SDL_Rect t = { r.x + cellSize/4, r.y + cellSize/4, cellSize/2, cellSize/2 };
+                    SDL_RenderFillRect(renderer, &t);
+                    break;
+
+                // case 3:
+                //     SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
+                //     SDL_RenderFillRect(renderer, &r);
+                //     break;
+            
+                default:
+                    break;
             }
+           
         }
     }
 }

@@ -52,16 +52,26 @@ void drawMinimap(SDL_Renderer *renderer, Player player, EffectManager *effects)
                 (int)ceilf(cellSize * MM_SCALE)
             };
 
-            if (v == 1) {
-                SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
-                SDL_RenderFillRect(renderer, &drawR);
-            } else if (v == 2) {
-                SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
-                SDL_Rect t = { drawR.x + drawR.w/4, drawR.y + drawR.h/4, drawR.w/2, drawR.h/2 };
-                SDL_RenderFillRect(renderer, &t);
-            } else if (v == 3) {
-                SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
-                SDL_RenderFillRect(renderer, &drawR);
+            switch (v)
+            {
+                case 1:
+                    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+                    SDL_RenderFillRect(renderer, &drawR);
+                    break;
+                
+                case 9:
+                    SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
+                    SDL_Rect t = { drawR.x + drawR.w/4, drawR.y + drawR.h/4, drawR.w/2, drawR.h/2 };
+                    SDL_RenderFillRect(renderer, &t);
+                    break;
+
+                // case 3:
+                //     SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
+                //     SDL_RenderFillRect(renderer, &drawR);
+                //     break;
+            
+                default:
+                    break;
             }
         }
     }

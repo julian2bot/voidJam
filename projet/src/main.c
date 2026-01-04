@@ -133,8 +133,9 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 
 
 
-		CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
-
+		// CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
+		// CheckRaysGrid(&camera, 30, tailleFenetreW, tailleFenetreH, renderer);
+		CheckRaysGridDDA(&camera, tailleFenetreW, tailleFenetreH, renderer);
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// drawWalls(renderer, walls, wall_count);
 		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effects);

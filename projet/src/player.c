@@ -56,7 +56,7 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 
     // gestion de la fatigue via helper
     updatePlayerFatigue(player, playerUI);
-    printf("fatigue : %f\n", player->fatigue);
+    // printf("fatigue : %f\n", player->fatigue);
 
 	updateSteering(player, turnLeft, turnRight, DELTA_TIME);
 

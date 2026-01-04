@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include <SDL.h>
+#include "map.h"
 #include "player.h"
 #include "vector2.h"
 
@@ -18,6 +19,8 @@ void CalculatePlane(Camera *camera);
 void UpdatePosition(Camera *camera, Vector2 vector2);
 void UpdateRotation(Camera *camera, float rotation);
 void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallNumber, int screenW, int screenH, SDL_Renderer *renderer3D);
+void CheckRaysGrid(Camera *camera, int raysOffsetNumber, int screenW, int screenH, SDL_Renderer *renderer3D);
+void CheckRaysGridDDA(Camera *camera, int screenW, int screenH, SDL_Renderer *renderer3D);
 void UpdateCameraPlayer(Camera *camera, Player *player);
 
 #endif
