@@ -6,7 +6,12 @@
 #define MM_HEIGHT 150
 #define MM_SCALE 0.25f
 
-int explosion = 1;
+static int explosion = 1;
+
+void reset_minimap_explosion_flag(void)
+{
+    explosion = 1;
+}
 
 void drawMinimap(SDL_Renderer *renderer, Player player, EffectManager *effects)
 {

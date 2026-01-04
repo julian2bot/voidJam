@@ -7,5 +7,6 @@
 #include "effects.h"
 
 void drawMinimap(SDL_Renderer *renderer, Player player, EffectManager *effects);
+void reset_minimap_explosion_flag(void);
 
 #endif

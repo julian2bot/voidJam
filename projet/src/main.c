@@ -7,6 +7,7 @@
 #include <SDL_ttf.h>
 #include <time.h>
 #include "player.h"
+#include "minimap.h"
 #include "map.h"
 #include "gestionSDL.h"
 #include "effects.h"
@@ -58,8 +59,9 @@ int init(SDL_Window **window, SDL_Renderer **renderer)
     return 0;
 }
 
-State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Event event, EffectManager effects){
- 	if (!audio_init_dir("assets/music")) {
+State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Event event, EffectManager effectsMort, EffectManager effectsMap, float *score){
+	*score = 0; // score reset ici
+	if (!audio_init_dir("assets/music")) {
 		fprintf(stderr, "Warning: no audio tracks loaded from assets/music\n");
 	}
 
@@ -85,13 +87,14 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 	Camera camera = CreateCamera(CreateVector(player.pos.x, player.pos.y), player.angle, 60);
 	int fin = 0;
 	SDL_Rect roadRect = {0, tailleFenetreH/2, tailleFenetreW, tailleFenetreH/2}; 
-	while (!player.tesMort && !fin)
+	int endGame = 0;
+	while (!endGame && !fin)
 	{
 		SDL_SetRenderDrawColor(renderer, 17, 7, 82, 255); // fond bleu foncé
 		SDL_RenderClear(renderer);
 
 
-		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, items, item_count, &effects, &playerUI);
+		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, items, item_count,&effectsMort, &effects, &playerUI);
 
 
 		// Boucle principale
@@ -147,11 +150,16 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// drawWalls(renderer, walls, wall_count);
-		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effects);
+		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effectsMap, score);
 		UpdateCameraPlayer(&camera, &player);
 		// drawPlayer(renderer, player);
-		updateEffects(&effects); // Update animations
-		drawEffects(&effects, renderer); // Draw them
+		drawEffetMort(renderer, &effectsMort);
+		updateEffects(&effectsMort);
+
+		// fin du jeur
+		if (player.tesMort && !effects_hasActiveExplosions(&effectsMort)) {
+			endGame = 1;
+		}
 
 		SDL_RenderPresent(renderer);
 		SDL_Delay(16);
@@ -160,6 +168,12 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 	if(fin){
 		return EXIT;
 	}
+	reset_animation(&effectsMort);
+	reset_animation(&effectsMap);
+
+	reset_player_death_flags();
+	reset_minimap_explosion_flag();
+
 	return GAME_OVER;
 }
 
@@ -250,12 +264,20 @@ State MainMenu(SDL_Renderer *renderer, SDL_Event event){
 	return currentState;
 }
 
-State GameOverMenu(SDL_Renderer *renderer, SDL_Event event, int* score){
+State GameOverMenu(SDL_Renderer *renderer, SDL_Event event, float* score){
 	TTF_Font *font = TTF_OpenFont("time.ttf", 32);
 	TTF_Font *fontTitle = TTF_OpenFont("time.ttf", 100);
 
 	char strScore[35];
-	snprintf(strScore, sizeof(strScore), "Distance parcourue : %d m", *score);
+
+	// convert m to km
+	if (*score < 1000.0f) {
+		snprintf(strScore, sizeof(strScore),
+				"Distance parcourue : %.2f m", *score);
+	} else {
+		snprintf(strScore, sizeof(strScore),
+				"Distance parcourue : %.2f km", *score / 1000.0f);
+	}
 
 
 	SDL_Rect rectTitle = {0,20, tailleFenetreW, 50};
@@ -354,13 +376,14 @@ int main(int argc, char *argv[])
 	init(&mafenetre, &renderer);
 
 	Player player = initPlayer(renderer);
-	EffectManager effects = initEffects(renderer);
+	EffectManager effectsMap = initEffects(renderer, "explosionMiniMap.png");
+	EffectManager effectsMort = initEffects(renderer, "explosionMort.png");
 	const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 	
 	int fin = 0;
 	State currentState = MAIN;
-	int score = 100;
-	int *scorePointer = &score;
+	float score = 100;
+	float *scorePointer = &score;
 
 	while (!fin)
 	{
@@ -375,7 +398,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case GAME:
-				currentState = game(player, renderer, keyboard, event, effects);
+				currentState = game(player, renderer, keyboard, event, effectsMort, effectsMap, scorePointer);
 				break;
 
 			case EXIT:
@@ -386,7 +409,8 @@ int main(int argc, char *argv[])
 	}
 
 	destroyPlayer(player);
-	destroyEffects(&effects);
+	destroyEffects(&effectsMap);
+	destroyEffects(&effectsMort);
 
 	video_quit();
 	audio_quit();
