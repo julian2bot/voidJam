@@ -1,10 +1,10 @@
 #include "effects.h"
 #include <stdio.h>
 
-EffectManager initEffects(SDL_Renderer *renderer)
+EffectManager initEffects(SDL_Renderer *renderer, char* nomAnimation)
 {
     EffectManager manager;
-    manager.explosionTexture = getTextureFromImage("explosion.png", renderer);
+    manager.explosionTexture = getTextureFromImage(nomAnimation, renderer);
     
     if (manager.explosionTexture) {
         int w, h;
@@ -86,5 +86,30 @@ void destroyEffects(EffectManager *manager)
     if (manager->explosionTexture)
     {
         SDL_DestroyTexture(manager->explosionTexture);
+    }
+}
+
+int effects_hasActiveExplosions(EffectManager *manager)
+{
+    if (!manager) return 0;
+    for (int i = 0; i < MAX_EXPLOSIONS; i++)
+    {
+        if (manager->explosions[i].active) return 1;
+    }
+    return 0;
+}
+
+void reset_animation(EffectManager *manager)
+{
+    if (!manager) return;
+    for (int i = 0; i < MAX_EXPLOSIONS; i++)
+    {
+        manager->explosions[i].active = 0;
+        manager->explosions[i].currentFrame = 0;
+        manager->explosions[i].lastUpdate = 0;
+        manager->explosions[i].rect.x = 0;
+        manager->explosions[i].rect.y = 0;
+        manager->explosions[i].rect.w = 0;
+        manager->explosions[i].rect.h = 0;
     }
 }
