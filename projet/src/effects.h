@@ -23,7 +23,7 @@ typedef struct {
     int frameHeight;
 } EffectManager;
 
-EffectManager initEffects(SDL_Renderer *renderer);
+EffectManager initEffects(SDL_Renderer *renderer, char* nomAnimation);
 void addExplosion(EffectManager *manager, int x, int y);
 void updateEffects(EffectManager *manager);
 void drawEffects(EffectManager *manager, SDL_Renderer *renderer);

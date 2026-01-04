@@ -44,10 +44,10 @@ Player initPlayer(SDL_Renderer *renderer);
 void drawPlayer(SDL_Renderer *renderer, Player player);
 void movePlayer(Player *player);
 void destroyPlayer(Player p);
-void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer* PlayerUI);
+void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer* PlayerUI, float *score);
 int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *intersection);
-void gameOver(Player *player);
-void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer *playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects);
+void gameOver(Player *player, EffectManager* effects);
+void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer *playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects, float *score);
 
 //dash board
 static void drawSteeringWheel(SDL_Renderer *renderer, Player player);
@@ -66,5 +66,7 @@ void drawSpeedTicks(SDL_Renderer *r, int cx, int cy);
 void drawFatigueArc(SDL_Renderer *r, int cx, int cy, int r1, int r2, float aStart, float aEnd);
 void drawFatigueTicks(SDL_Renderer *r, int cx, int cy);
 void drawMirror(SDL_Renderer* renderer);
+void drawDistance(SDL_Renderer* renderer, float score);
+void drawEffetMort(SDL_Renderer *renderer, EffectManager * effectsMort);
 
 #endif

@@ -38,7 +38,7 @@ void movePlayer(Player *player)
 }
 
 void updatePlayer(Player *player, int turnLeft, int turnRight,
-                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer *playerUI)
+                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer *playerUI, float *score)
 {
 	
 	SDL_Rect intersect;
@@ -46,13 +46,12 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 	{
 		// if(player->vitesse > 0) addExplosion(effects, intersect.x + intersect.w / 2, intersect.y + intersect.h / 2);
 		printf("Collision\n");
-		gameOver(player);
-		return;
+		gameOver(player, effects);
 	}
 
-    if(player->fatigue < 0){
-        gameOver(player);
-    }
+    // if(player->fatigue < 0){
+    //     gameOver(player);
+    // }
 
     // gestion de la fatigue via helper
     updatePlayerFatigue(player, playerUI);
@@ -65,7 +64,10 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
 
     if (forward)
     {
+        *score += .4;
         player->vitesse += (SPEED_MAX - player->vitesse) * ACCEL;
+    }else{
+        *score += .2;
     }
 
     if (back)
@@ -99,11 +101,24 @@ int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *interse
 	return 0;
 }
 
-void gameOver(Player *player)
+int explosionMort = 1;
+void gameOver(Player *player, EffectManager *effects)
 {
 	player->vitesse = 0;
 	player->tesMort = 1;
+    if (effects)
+    {
+        if (explosionMort && player->tesMort) {
+            addExplosion(effects, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2);
+            explosionMort = 0;
+        }
+    }
+}
 
+void drawEffetMort(SDL_Renderer *renderer, EffectManager * effectsMort)
+{
+    updateEffects(effectsMort); // Update animations
+    drawEffects(effectsMort, renderer); // Draw them
 }
 
 void destroyPlayer(Player p)
@@ -113,9 +128,11 @@ void destroyPlayer(Player p)
 
 
 // Dashboard
-void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects)
+void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects, float *score)
 {
     drawDashboard(renderer);
+    drawDistance(renderer, *score);
+
     drawSpeedGauge(renderer, player);
     drawFatigueGauge(renderer, player);
     drawSteeringWheel(renderer, player);
@@ -128,7 +145,20 @@ void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer* playerUI, S
     drawFatigueOverlay(renderer, player);
 
     if (player.tesMort && player.codeKonami) drawMirror(renderer);
+    updateEffects(effects); // Update animations
+    drawEffects(effects, renderer); // Draw them
+
 }
+
+void drawDistance(SDL_Renderer* renderer, float score)
+{
+    char buffer[64];
+ 
+    snprintf(buffer, sizeof(buffer), "Km : %.2f", score / 1000.0f);
+
+    drawText(renderer, NULL, NULL, buffer,  280, SCREEN_HEIGHT - 160, 14);
+}
+
 
 void drawMirror(SDL_Renderer* renderer)
 {

@@ -1,10 +1,10 @@
 #include "effects.h"
 #include <stdio.h>
 
-EffectManager initEffects(SDL_Renderer *renderer)
+EffectManager initEffects(SDL_Renderer *renderer, char* nomAnimation)
 {
     EffectManager manager;
-    manager.explosionTexture = getTextureFromImage("explosion.png", renderer);
+    manager.explosionTexture = getTextureFromImage(nomAnimation, renderer);
     
     if (manager.explosionTexture) {
         int w, h;
