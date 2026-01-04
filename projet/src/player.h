@@ -7,6 +7,7 @@
 #include "gestionSDL.h"
 #include "effects.h"
 #include "musicPlayer.h"
+#include "Vector2.h"
 #define SPEED_MIN 0.4f
 #define SPEED_MAX 2.0f
 #define FATIGUE_MIN 0.4f
@@ -44,7 +45,7 @@ Player initPlayer(SDL_Renderer *renderer);
 void drawPlayer(SDL_Renderer *renderer, Player player);
 void movePlayer(Player *player);
 void destroyPlayer(Player p);
-void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer* PlayerUI);
+void updatePlayer(Player *player, int turnLeft, int turnRight, int forward, int back, SDL_Rect *walls, int wall_count, SDL_Rect *items, int item_count, EffectManager *effects, MusicPlayer *playerUI);
 int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *intersection);
 void gameOver(Player *player);
 void drawCockPit(SDL_Renderer *renderer, Player player, MusicPlayer *playerUI, SDL_Rect *walls, int wallCount, EffectManager *effects);

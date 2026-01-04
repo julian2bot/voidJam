@@ -10,7 +10,10 @@
 #define MAP_H_ 15
 
 SDL_Rect *walls = NULL;
+SDL_Rect items[10];
+Vector2 itemsPos[10];
 int wall_count = 0;
+int item_count = 0;
 static int currentCellSize = 64;
 
 void initMap(int cellSize)
@@ -20,9 +23,11 @@ void initMap(int cellSize)
 
     // Count walls (cells == 1)
     int count = 0;
+    int count_items = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
             if (grid[y][x] == 1) count++;
+            if (grid[y][x] == 9) count_items++;
         }
     }
 
@@ -35,6 +40,7 @@ void initMap(int cellSize)
 
     // Fill walls
     int idx = 0;
+    int idx2 = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
             if (grid[y][x] == 1) {
@@ -44,9 +50,19 @@ void initMap(int cellSize)
                 walls[idx].h = cellSize;
                 idx++;
             }
+            if (grid[y][x] == 9) {
+                items[idx2].x = x * cellSize;
+                items[idx2].y = y * cellSize;
+                items[idx2].w = cellSize;
+                items[idx2].h = cellSize;
+                itemsPos[idx2].x = x;
+                itemsPos[idx2].y = y;
+                idx2++;
+            }
         }
     }
     wall_count = idx;
+    item_count = idx2;
 }
 
 int getMapCell(int x, int y)
@@ -112,4 +128,9 @@ void drawWalls(SDL_Renderer *renderer, SDL_Rect *wallsArr, int wall_count)
     for (int i = 0; i < wall_count; i++) {
         SDL_RenderFillRect(renderer, &wallsArr[i]);
     }
+}
+
+void freeMap(){
+    free(walls);
+    walls = NULL;
 }

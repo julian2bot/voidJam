@@ -5,6 +5,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+int depth[60];
 
 Camera CreateCamera(Vector2 position, float rotation, float fov){
     Camera camera = {position, DEG2RAD(rotation), fov, 0,0};
@@ -256,15 +257,17 @@ void CheckRaysGridDDA(Camera *camera, int screenW, int screenH, SDL_Renderer *re
             float dist;
             if (side == 0) {
                 dist = (mapX - camera->position.x / wallSize + (1 - stepX) / 2) * wallSize / rayX;
-                SDL_SetRenderDrawColor(renderer3D, 150, 0, 0, 255);
+                SDL_SetRenderDrawColor(renderer3D, 40, 40, 40, 255);
             } else {
                 dist = (mapY - camera->position.y / wallSize + (1 - stepY) / 2) * wallSize / rayY;
-                SDL_SetRenderDrawColor(renderer3D, 255, 0, 0, 255);
+                SDL_SetRenderDrawColor(renderer3D, 20, 20, 20, 255);
             }
 
             // Correction du fish-eye
             float ca = camera->radiant - rayAngle;
             dist *= cosf(ca);
+
+            depth[r] = dist;
 
             // Hauteur du mur
             int lineH = (int)((wallSize * screenH) / dist);
@@ -288,3 +291,56 @@ void CheckRaysGridDDA(Camera *camera, int screenW, int screenH, SDL_Renderer *re
     }
 }
 
+void drawItem(ItemVisualisation *item, Camera *camera, int screenW, int screenH, SDL_Renderer *renderer){
+    // float colW = (float)screenW / camera->fov;
+    // int wallSize = 64;
+    // int mapX = (int)(camera->position.x / wallSize);
+    // int mapY = (int)(camera->position.y / wallSize);
+    
+    // float dx = item->position.x - mapX;
+    // float dy = item->position.y - mapY;
+
+    // float itemAngle = atan2f(dy, dx);
+    // float deltaAngle = itemAngle - camera->radiant;
+
+    // while (deltaAngle > M_PI)  deltaAngle -= 2 * M_PI;
+    // while (deltaAngle < -M_PI) deltaAngle += 2 * M_PI;
+    
+    
+    // float halfFov = DEG2RAD(camera->fov) * 0.5f;
+    
+    // if (fabsf(deltaAngle) > halfFov) {
+    //     return;
+    // }
+    
+    // float screenXRatio = (deltaAngle + halfFov) / (2.0f * halfFov);
+    // int itemScreenX = (int)(screenXRatio * screenW);
+    
+    // float dist = sqrtf(dx * dx + dy * dy);
+    // float inshallahDist = dist * 10;
+    
+    // int r = (int) (deltaAngle+halfFov) * 180/ M_PI;
+    // if(depth[r]<inshallahDist){
+    //     return;
+    // }
+    // printf("%d, %.2f, %.2f\n", itemScreenX, screenXRatio, r*colW);
+
+    // dist *= cosf(deltaAngle);
+
+    // int itemSize = (int)((screenH) / dist) / 2;
+    // int itemTop = (screenH / 2) - (itemSize / 2);
+
+    // SDL_Rect rect;
+    // rect.w = itemSize;
+    // rect.h = itemSize;
+    // rect.x = itemScreenX - (itemSize / 2);
+    // rect.y = itemTop;
+
+    // // printf("%d %d %d %d\n", rect.x, rect.y, rect.w, rect.h);
+    // SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
+    // SDL_RenderFillRect(renderer, &rect);
+}
+
+// void drawItems(ItemVisualisation *items, int itemCount, SDL_Renderer *renderer){
+//     for(int i = 0; i<itemCount; i++);
+// }

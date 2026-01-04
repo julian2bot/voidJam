@@ -1,6 +1,7 @@
 #include "player.h"
 #include "minimap.h"
 #include "video.h"
+#include "map.h"
 
 Player initPlayer(SDL_Renderer *renderer)
 {
@@ -38,16 +39,36 @@ void movePlayer(Player *player)
 }
 
 void updatePlayer(Player *player, int turnLeft, int turnRight,
-                  int forward, int back, SDL_Rect *walls, int wall_count, EffectManager *effects, MusicPlayer *playerUI)
+                  int forward, int back, SDL_Rect *walls, int wall_count, SDL_Rect *items, int item_count, EffectManager *effects, MusicPlayer *playerUI)
 {
 	
 	SDL_Rect intersect;
+	SDL_Rect intersect2;
 	if(collision(player, walls, wall_count, &intersect))
 	{
 		// if(player->vitesse > 0) addExplosion(effects, intersect.x + intersect.w / 2, intersect.y + intersect.h / 2);
 		printf("Collision\n");
 		gameOver(player);
 		return;
+	}
+    
+    int indexItemCol = collision(player, items, item_count, &intersect2);
+    if(indexItemCol)
+	{
+        indexItemCol--;
+		printf("Collision item \n");
+        items[indexItemCol].x = 0;
+        items[indexItemCol].y = 0;
+        items[indexItemCol].w = 0;
+        items[indexItemCol].h = 0;
+
+        Vector2 vec = itemsPos[indexItemCol];
+        printf("%d, %d\n", (int)vec.y, (int)vec.x);
+        grid[(int)vec.y][(int)vec.x] = 0;
+        printf("%d\n", grid[(int)vec.y][(int)vec.x]);
+        
+		// gameOver(player);
+		// return;
 	}
 
     if(player->fatigue < 0){
@@ -91,13 +112,15 @@ int collision(Player *player, SDL_Rect *walls, int wall_count, SDL_Rect *interse
 {
 	for (int i = 0; i < wall_count; i++)
 	{
+        if(&walls[i]==NULL){continue;}
 		if (SDL_IntersectRect(&player->position, &walls[i], intersection))
 		{
-			return 1;
+			return i+1;
 		}
 	}
 	return 0;
 }
+
 
 void gameOver(Player *player)
 {
