@@ -94,7 +94,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		SDL_RenderClear(renderer);
 
 
-		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, items, item_count,&effectsMort, &effects, &playerUI);
+		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, items, item_count, &effectsMort, &playerUI, score);
 
 
 		// Boucle principale

@@ -50,4 +50,5 @@ void freeMap();
 int getMapWidth(void);
 int getMapHeight(void);
 int getMapCellSize(void);
+int setMapCell(int x, int y, int value);
 #endif

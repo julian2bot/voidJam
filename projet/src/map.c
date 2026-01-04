@@ -134,3 +134,10 @@ void freeMap(){
     free(walls);
     walls = NULL;
 }
+
+int setMapCell(int x, int y, int value)
+{
+    if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H_) return -1;
+    grid[y][x] = value;
+    return grid[y][x];
+}

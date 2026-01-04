@@ -39,7 +39,7 @@ void movePlayer(Player *player)
 }
 
 void updatePlayer(Player *player, int turnLeft, int turnRight,
-                  int forward, int back, SDL_Rect *walls, int wall_count, SDL_Rect *items, int item_count,EffectManager *effectsMort, EffectManager *effects, MusicPlayer *playerUI)
+                  int forward, int back, SDL_Rect *walls, int wall_count, SDL_Rect *items, int item_count, EffectManager *effects, MusicPlayer *playerUI, float *score)
 {
 	
 	SDL_Rect intersect;
@@ -62,10 +62,11 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
         items[indexItemCol].h = 0;
 
         Vector2 vec = itemsPos[indexItemCol];
-        printf("%d, %d\n", (int)vec.y, (int)vec.x);
-        grid[(int)vec.y][(int)vec.x] = 0;
-        printf("%d\n", grid[(int)vec.y][(int)vec.x]);
-        
+        // printf("%d, %d\n", (int)vec.y, (int)vec.x);
+        // grid[(int)vec.y][(int)vec.x] = 0;
+// /        printf("%d\n", grid[(int)vec.y][(int)vec.x]);
+        setMapCell((int)vec.x,(int)vec.y,0);
+
 		// gameOver(player);
 		// return;
 	}
