@@ -1,33 +1,15 @@
 #include "map.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
-// Grid map: 0 = road, 1 = wall, 2 = token, 3 = tree
-// Small example grid (mapWidth x mapHeight)
-#define MAP_W 20
-#define MAP_H_ 15
 
-static int grid[MAP_H_][MAP_W] = {
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
-    {1,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-    {1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1},
-    {1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1},
-    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
-
+// Grid map: 0 = road, 1 = wall, 9 = coffee/token, 3 = tree
+// Arrays are allocated by initMap
 SDL_Rect *walls = NULL;
-int wall_count = 0;
 SDL_Rect *items = NULL;
+Vector2 *itemsPos = NULL;
+int wall_count = 0;
 int item_count = 0;
 static int currentCellSize = 64;
 
@@ -35,63 +17,73 @@ void initMap(int cellSize)
 {
     if (cellSize <= 0) cellSize = 64;
     currentCellSize = cellSize;
-
-    // Count walls (cells == 1)
-    int count = 0;
+    // Count walls and items (items marked with 9)
+    int countWalls = 0;
+    int countItems = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
-            if (grid[y][x] == 1) count++;
+            if (grid[y][x] == 1) countWalls++;
+            if (grid[y][x] == 9) countItems++;
         }
     }
 
-    // Allocate walls array
-    walls = (SDL_Rect *)malloc(sizeof(SDL_Rect) * count);
-    if (!walls) {
-        wall_count = 0;
-        return;
+    // Free previous buffers if present
+    if (walls) { free(walls); walls = NULL; }
+    if (items) { free(items); items = NULL; }
+    if (itemsPos) { free(itemsPos); itemsPos = NULL; }
+
+    // Allocate walls and items arrays
+    if (countWalls > 0) {
+        walls = (SDL_Rect *)malloc(sizeof(SDL_Rect) * countWalls);
+        if (!walls) {
+            wall_count = 0;
+            item_count = 0;
+            return;
+        }
+    } else {
+        walls = NULL;
     }
 
-    // Fill walls
-    int idx = 0;
+    if (countItems > 0) {
+        items = (SDL_Rect *)malloc(sizeof(SDL_Rect) * countItems);
+        itemsPos = (Vector2 *)malloc(sizeof(Vector2) * countItems);
+        if (!items || !itemsPos) {
+            if (items) { free(items); items = NULL; }
+            if (itemsPos) { free(itemsPos); itemsPos = NULL; }
+            item_count = 0;
+        }
+    } else {
+        items = NULL;
+        itemsPos = NULL;
+    }
+
+    // Fill walls and items
+    int wi = 0;
+    int ii = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
             if (grid[y][x] == 1) {
-                walls[idx].x = x * cellSize;
-                walls[idx].y = y * cellSize;
-                walls[idx].w = cellSize;
-                walls[idx].h = cellSize;
-                idx++;
+                walls[wi].x = x * cellSize;
+                walls[wi].y = y * cellSize;
+                walls[wi].w = cellSize;
+                walls[wi].h = cellSize;
+                wi++;
+            }
+            if (grid[y][x] == 9) {
+                items[ii].x = x * cellSize;
+                items[ii].y = y * cellSize;
+                items[ii].w = cellSize;
+                items[ii].h = cellSize;
+                itemsPos[ii].x = x;
+                itemsPos[ii].y = y;
+                ii++;
             }
         }
     }
-    wall_count = idx;
 
-    // Count and fill items (cells == 2 or 3)
-    int icount = 0;
-    for (int y = 0; y < MAP_H_; y++) {
-        for (int x = 0; x < MAP_W; x++) {
-            if (grid[y][x] == 2 || grid[y][x] == 3) icount++;
-        }
-    }
-    if (items) free(items);
-    items = (SDL_Rect *)malloc(sizeof(SDL_Rect) * icount);
-    if (!items) {
-        item_count = 0;
-        return;
-    }
-    int j = 0;
-    for (int y = 0; y < MAP_H_; y++) {
-        for (int x = 0; x < MAP_W; x++) {
-            if (grid[y][x] == 2 || grid[y][x] == 3) {
-                items[j].x = x * cellSize;
-                items[j].y = y * cellSize;
-                items[j].w = cellSize;
-                items[j].h = cellSize;
-                j++;
-            }
-        }
-    }
-    item_count = j;
+    wall_count = wi;
+    item_count = ii;
+    // item_count = idx2;
 }
 
 int getMapCell(int x, int y)
@@ -134,17 +126,29 @@ void drawMap(SDL_Renderer *renderer, int cellSize)
         for (int x = 0; x < MAP_W; x++) {
             int v = grid[y][x];
             SDL_Rect r = { x * cellSize, y * cellSize, cellSize, cellSize };
-            if (v == 1) {
-                SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
-                SDL_RenderFillRect(renderer, &r);
-            } else if (v == 2) {
-                SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
-                SDL_Rect t = { r.x + cellSize/4, r.y + cellSize/4, cellSize/2, cellSize/2 };
-                SDL_RenderFillRect(renderer, &t);
-            } else if (v == 3) {
-                SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
-                SDL_RenderFillRect(renderer, &r);
+            switch (v)
+            {
+                case 1:
+                    SDL_SetRenderDrawColor(renderer, 120, 120, 120, 255);
+                    SDL_RenderFillRect(renderer, &r);
+                    break;
+                
+                case 9:
+                    printf("CAFE");
+                    SDL_SetRenderDrawColor(renderer, 240, 200, 0, 255);
+                    SDL_Rect t = { r.x + cellSize/4, r.y + cellSize/4, cellSize/2, cellSize/2 };
+                    SDL_RenderFillRect(renderer, &t);
+                    break;
+
+                // case 3:
+                //     SDL_SetRenderDrawColor(renderer, 30, 150, 30, 255);
+                //     SDL_RenderFillRect(renderer, &r);
+                //     break;
+            
+                default:
+                    break;
             }
+           
         }
     }
 }
@@ -155,4 +159,19 @@ void drawWalls(SDL_Renderer *renderer, SDL_Rect *wallsArr, int wall_count)
     for (int i = 0; i < wall_count; i++) {
         SDL_RenderFillRect(renderer, &wallsArr[i]);
     }
+}
+
+void freeMap(){
+    if (walls) { free(walls); walls = NULL; }
+    if (items) { free(items); items = NULL; }
+    if (itemsPos) { free(itemsPos); itemsPos = NULL; }
+    wall_count = 0;
+    item_count = 0;
+}
+
+int setMapCell(int x, int y, int value)
+{
+    if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H_) return -1;
+    grid[y][x] = value;
+    return grid[y][x];
 }
