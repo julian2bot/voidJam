@@ -15,6 +15,7 @@
 #include "button.h"
 #include "audio.h"
 #include "video.h"
+#include "items.h"
 
 #define tailleFenetreH 600
 #define tailleFenetreW 1000
@@ -77,6 +78,12 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 
  	initMap(64);
 
+	/* load item sprite (optional: place assets/cup.png) */
+	SDL_Texture *itemTexture = getTextureFromImage("assets/cup.png", renderer);
+	if (!itemTexture) {
+		itemTexture = create_cup_texture(renderer);
+	}
+
  	int vf = video_init_dir(renderer, "assets/videos/crash", 24);
 	if (vf <= 0) {
 		fprintf(stderr, "Note: no video frames found in assets/videos/crash\n");
@@ -92,6 +99,10 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 	{
 		SDL_SetRenderDrawColor(renderer, 17, 7, 82, 255); // fond bleu foncé
 		SDL_RenderClear(renderer);
+
+		// draw road (ground) as black rectangle
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderFillRect(renderer, &roadRect);
 
 
 		updatePlayer(&player, keyboard[SDL_SCANCODE_D], keyboard[SDL_SCANCODE_A],keyboard[SDL_SCANCODE_W], keyboard[SDL_SCANCODE_S], walls, wall_count, items, item_count, &effectsMort, &playerUI, score);
@@ -109,8 +120,9 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 			case SDL_KEYDOWN:
 				// printf("touche %c\n", event.key.keysym.sym);
 				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
-				if (event.key.keysym.sym == SDLK_UP) gestionFatigue(&player, .5 );
-				if (event.key.keysym.sym == SDLK_DOWN) gestionFatigue(&player, -.5 );
+				// if (event.key.keysym.sym == SDLK_UP) gestionFatigue(&player, .5 );
+				// if (event.key.keysym.sym == SDLK_DOWN) gestionFatigue(&player, -.5 );
+				
 				// Konami code detection
 				if (!player.codeKonami) {
 					SDL_Keycode k = event.key.keysym.sym;
@@ -139,15 +151,19 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 		}
 
 
+// <<<<<<< HEAD
+		CheckRays(&camera, 20, walls, wall_count, getMapItems(), getMapItemCount(), tailleFenetreW, tailleFenetreH, renderer, itemTexture);
 
-		// CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
-		// CheckRaysGrid(&camera, 30, tailleFenetreW, tailleFenetreH, renderer);
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderFillRect(renderer, &roadRect);
+
+// 		// CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
+// 		// CheckRaysGrid(&camera, 30, tailleFenetreW, tailleFenetreH, renderer);
+// 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+// 		SDL_RenderFillRect(renderer, &roadRect);
 		
-		CheckRaysGridDDA(&camera, tailleFenetreW, tailleFenetreH, renderer);
-		drawItem(&item, &camera, tailleFenetreW, tailleFenetreH, renderer);
+// 		CheckRaysGridDDA(&camera, tailleFenetreW, tailleFenetreH, renderer);
+// 		drawItem(&item, &camera, tailleFenetreW, tailleFenetreH, renderer);
 		
+// >>>>>>> main
 		SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 		// drawWalls(renderer, walls, wall_count);
 		drawCockPit(renderer, player, &playerUI, walls, wall_count, &effectsMap, score);
@@ -166,6 +182,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 	}
 	freeMap();
 	if(fin){
+		if (itemTexture) SDL_DestroyTexture(itemTexture);
 		return EXIT;
 	}
 	reset_animation(&effectsMort);
@@ -174,6 +191,7 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 	reset_player_death_flags();
 	reset_minimap_explosion_flag();
 
+	if (itemTexture) SDL_DestroyTexture(itemTexture);
 	return GAME_OVER;
 }
 

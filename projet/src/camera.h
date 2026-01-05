@@ -19,6 +19,8 @@ Camera CreateCamera(Vector2 position, float rotation, float fov);
 void CalculatePlane(Camera *camera);
 void UpdatePosition(Camera *camera, Vector2 vector2);
 void UpdateRotation(Camera *camera, float rotation);
+void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallNumber, SDL_Rect items[], int itemCount, int screenW, int screenH, SDL_Renderer *renderer3D, SDL_Texture *itemTexture);
+void CheckRaysGrid(Camera *camera, int raysOffsetNumber, int screenW, int screenH, SDL_Renderer *renderer3D);
 void CheckRaysGridDDA(Camera *camera, int screenW, int screenH, SDL_Renderer *renderer3D);
 void UpdateCameraPlayer(Camera *camera, Player *player);
 void drawItem(ItemVisualisation *item, Camera *camera, int screenW, int screenH, SDL_Renderer *renderer);

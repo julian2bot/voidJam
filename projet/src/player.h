@@ -10,7 +10,7 @@
 #include "vector2.h"
 #define SPEED_MIN 0.4f
 #define SPEED_MAX 2.0f
-#define FATIGUE_MIN 0.4f
+#define FATIGUE_MIN 0.0f
 #define FATIGUE_MAX 2.0f
 #define ACCEL     0.06f
 #define BRAKE     0.08f
