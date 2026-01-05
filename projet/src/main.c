@@ -275,7 +275,7 @@ State MainMenu(SDL_Renderer *renderer, SDL_Event event){
 		{
 			displayButton(&buttons[i], renderer, font);
 		}
-		drawCenteredText(renderer, fontTitle, white, "TITLE", rectTitle);
+		drawCenteredText(renderer, fontTitle, white, "Try not to CRASH", rectTitle);
 
 		SDL_RenderPresent(renderer);
 	}
