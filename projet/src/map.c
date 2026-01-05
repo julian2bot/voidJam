@@ -6,8 +6,6 @@
 
 // Grid map: 0 = road, 1 = wall, 2 = token, 3 = tree
 // Small example grid (mapWidth x mapHeight)
-#define MAP_W 20
-#define MAP_H_ 15
 
 SDL_Rect *walls = NULL;
 SDL_Rect items[10];
