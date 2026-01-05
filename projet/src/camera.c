@@ -94,47 +94,88 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
             ca = camera->radiant - (startAngle + DEG2RAD(1) * (r + 1));
             if (ca < 0) ca += 2 * M_PI;
             if (ca > 2 * M_PI) ca -= 2 * M_PI;
-            // optional fisheye fix: disH = disH * cosf(ca);
-            lineH = (wallSize * screenH) / disH;
+            // apply fisheye correction for projection
+            float correctedDist = disH * cosf(ca);
+            if (correctedDist <= 0.0f) correctedDist = disH;
+            lineH = (int)((wallSize * (float)screenH) / correctedDist);
             if (lineH > screenH) lineH = screenH;
             lineOff = (screenH / 2) - (lineH / 2);
-            wallX = (int)(r * colW);
-            shade = 1.0f - (disH / maxDist);
+            int wallX = (int)floorf(r * colW);
+            int nextX = (int)floorf((r + 1) * colW);
+            int width = nextX - wallX;
+            if (width <= 0) width = (int)ceilf(colW);
+            shade = 1.0f - (correctedDist / maxDist);
             if (shade < 0.1f) shade = 0.1f;
             if (shade > 1.0f) shade = 1.0f;
             Uint8 col = (Uint8)fmaxf(20.0f, 200.0f * shade);
-            SDL_SetRenderDrawColor(renderer3D, col, col, col, 255);
-            for (int w = 0; w < 8; w++) {
-                SDL_RenderDrawLine(renderer3D, wallX + w, lineOff - wallSize, wallX + w, lineOff + lineH - wallSize);
+            for (int w = 0; w < width; w++) {
+                SDL_SetRenderDrawColor(renderer3D, col, col, col, 255);
+                SDL_RenderDrawLine(renderer3D, wallX + w, lineOff, wallX + w, lineOff + lineH);
             }
+            depth[r] = correctedDist;
         }
 
-        /* Draw item overlay if item is closer than wall (or no wall) */
-        if (renderer3D != NULL && nearestItemDist > 0) {
-            if (nearestWallDist < 0 || nearestItemDist < nearestWallDist) {
-                float itemDist = nearestItemDist;
-                float itemShade = 1.0f - (itemDist / maxDist);
-                if (itemShade < 0.1f) itemShade = 0.1f;
-                if (itemShade > 1.0f) itemShade = 1.0f;
+        /* per-ray: no item drawing here any more; second-pass will handle items */
+            /* mark depth for this ray if no wall was hit */
+            if (nearestWallDist <= 0) {
+                depth[r] = maxDist * 2.0f;
+            }
+    }
 
-                int projH = (items[nearestItemIndex].h * screenH) / (int)itemDist;
-                if (projH > screenH) projH = screenH;
-                int projW = projH; // square sprite
-                int projY = (screenH / 2) - (projH / 2);
-                int projX = (int)(r * colW) - (projW / 2);
+        /* Second pass: draw each item once if it's not occluded by walls */
+        if (renderer3D != NULL && itemCount > 0) {
+            float halfFov = DEG2RAD(camera->fov) * 0.5f;
+            for (int k = 0; k < itemCount; k++) {
+                // item center
+                float itemCenterX = items[k].x + items[k].w * 0.5f;
+                float itemCenterY = items[k].y + items[k].h * 0.5f;
+                // vector to item
+                float dx = itemCenterX - camera->position.x;
+                float dy = itemCenterY - camera->position.y;
+                float itemDist = sqrtf(dx*dx + dy*dy);
+                if (itemDist <= 0.001f) continue;
 
-                if (itemTexture) {
-                    SDL_Rect dst = { projX, projY, projW, projH };
-                    SDL_SetTextureAlphaMod(itemTexture, (Uint8)(255 * itemShade));
-                    SDL_RenderCopy(renderer3D, itemTexture, NULL, &dst);
-                } else {
-                    SDL_SetRenderDrawColor(renderer3D, (Uint8)(200 * itemShade), (Uint8)(120 * itemShade), 50, 255);
-                    SDL_Rect cup = { projX, projY, projW, projH };
-                    SDL_RenderFillRect(renderer3D, &cup);
+                float itemAngle = atan2f(dy, dx);
+                float delta = itemAngle - camera->radiant;
+                while (delta > M_PI) delta -= 2 * M_PI;
+                while (delta < -M_PI) delta += 2 * M_PI;
+
+                if (fabsf(delta) > halfFov) continue; // not in view
+
+                // corrected distance for projection
+                float corrected = itemDist * cosf(delta);
+
+                // compute screen column
+                int r = (int)((delta + halfFov) * (180.0f / M_PI));
+                if (r < 0) r = 0;
+                if (r >= camera->fov) r = camera->fov - 1;
+
+                if (corrected < depth[r]) {
+                    // draw item
+                    float screenXRatio = (delta + halfFov) / (DEG2RAD(camera->fov));
+                    int itemScreenX = (int)(screenXRatio * screenW);
+                    int projH = (items[k].h * screenH) / (int)itemDist;
+                    if (projH > screenH) projH = screenH;
+                    int projW = projH;
+                    int projY = (screenH / 2) - (projH / 2);
+                    int projX = itemScreenX - (projW / 2);
+
+                    float itemShade = 1.0f - (itemDist / maxDist);
+                    if (itemShade < 0.1f) itemShade = 0.1f;
+                    if (itemShade > 1.0f) itemShade = 1.0f;
+
+                    if (itemTexture) {
+                        SDL_Rect dst = { projX, projY, projW, projH };
+                        SDL_SetTextureAlphaMod(itemTexture, (Uint8)(255 * itemShade));
+                        SDL_RenderCopy(renderer3D, itemTexture, NULL, &dst);
+                    } else {
+                        SDL_SetRenderDrawColor(renderer3D, (Uint8)(200 * itemShade), (Uint8)(120 * itemShade), 50, 255);
+                        SDL_Rect cup = { projX, projY, projW, projH };
+                        SDL_RenderFillRect(renderer3D, &cup);
+                    }
                 }
             }
         }
-    }
 }
 
 
@@ -182,15 +223,18 @@ void CheckRaysGrid(Camera *camera, int raysOffsetNumber, int screenW, int screen
             if (lineH > screenH) lineH = screenH;
 
             int lineOff = (screenH / 2) - (lineH / 2);
-            int wallX = (int)(r * colW);
+            int wallX = (int)floorf(r * colW);
+            int nextX = (int)floorf((r + 1) * colW);
+            int width = nextX - wallX;
+            if (width <= 0) width = (int)ceilf(colW);
 
             float shade = 1.0f - (dist / (raysOffsetNumber * wallSize));
             if (shade < 0.1f) shade = 0.1f;
             if (shade > 1.0f) shade = 1.0f;
 
-            SDL_SetRenderDrawColor(renderer3D, (Uint8)(255 * shade), 0, 0, 255);
-
-            for (int w = 0; w < 8; w++) {
+            Uint8 col = (Uint8)fmaxf(20.0f, 200.0f * shade);
+            for (int w = 0; w < width; w++) {
+                SDL_SetRenderDrawColor(renderer3D, col, col, col, 255);
                 SDL_RenderDrawLine(renderer3D,
                                    wallX + w,
                                    lineOff,
@@ -284,14 +328,17 @@ void CheckRaysGridDDA(Camera *camera, int screenW, int screenH, SDL_Renderer *re
             if (lineH > screenH) lineH = screenH;
 
             int lineOff = (screenH / 2) - (lineH / 2);
-            int wallX = (int)(r * colW);
+            int wallX = (int)floorf(r * colW);
+            int nextX = (int)floorf((r + 1) * colW);
+            int width = nextX - wallX;
+            if (width <= 0) width = (int)ceilf(colW);
 
             float shade = 1.0f - fminf(dist / (MAP_W * wallSize), 1.0f);
             if (shade < 0.1f) shade = 0.1f;
             if (shade > 1.0f) shade = 1.0f;
             Uint8 col = (Uint8)fmaxf(20.0f, 200.0f * shade);
 
-            for (int w = 0; w < 8; w++) {
+            for (int w = 0; w < width; w++) {
                 SDL_SetRenderDrawColor(renderer3D, col, col, col, 255);
                 SDL_RenderDrawLine(renderer3D,
                                    wallX + w,
