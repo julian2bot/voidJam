@@ -7,8 +7,8 @@
 // Grid map: 0 = road, 1 = wall, 9 = coffee/token, 3 = tree
 // Arrays are allocated by initMap
 SDL_Rect *walls = NULL;
-SDL_Rect *items = NULL;
-Vector2 *itemsPos = NULL;
+SDL_Rect items[10];
+Vector2 itemsPos[10];
 int wall_count = 0;
 static int currentCellSize = 64;
 
@@ -45,29 +45,16 @@ void initMap(int cellSize)
         walls = NULL;
     }
 
-    if (countItems > 0) {
-        items = (SDL_Rect *)malloc(sizeof(SDL_Rect) * countItems);
-        itemsPos = (Vector2 *)malloc(sizeof(Vector2) * countItems);
-        if (!items || !itemsPos) {
-            if (items) { free(items); items = NULL; }
-            if (itemsPos) { free(itemsPos); itemsPos = NULL; }
-            item_count = 0;
-        }
-    } else {
-        items = NULL;
-        itemsPos = NULL;
-    }
-
     // Fill walls
     int idx = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
             if (grid[y][x] == 1) {
-                walls[wi].x = x * cellSize;
-                walls[wi].y = y * cellSize;
-                walls[wi].w = cellSize;
-                walls[wi].h = cellSize;
-                wi++;
+                walls[idx].x = x * cellSize;
+                walls[idx].y = y * cellSize;
+                walls[idx].w = cellSize;
+                walls[idx].h = cellSize;
+                idx++;
             }
             
         }
@@ -152,10 +139,7 @@ void drawWalls(SDL_Renderer *renderer, SDL_Rect *wallsArr, int wall_count)
 
 void freeMap(){
     if (walls) { free(walls); walls = NULL; }
-    if (items) { free(items); items = NULL; }
-    if (itemsPos) { free(itemsPos); itemsPos = NULL; }
     wall_count = 0;
-    item_count = 0;
 }
 
 int setMapCell(int x, int y, int value)

@@ -154,7 +154,6 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 // <<<<<<< HEAD
 		CheckRays(&camera, 20, walls, wall_count, getMapItems(), getMapItemCount(), tailleFenetreW, tailleFenetreH, renderer, itemTexture);
 
-// =======
 
 // 		// CheckRays(&camera, 20, walls, wall_count, tailleFenetreW, tailleFenetreH, renderer);
 // 		// CheckRaysGrid(&camera, 30, tailleFenetreW, tailleFenetreH, renderer);

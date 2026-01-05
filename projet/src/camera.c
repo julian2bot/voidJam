@@ -107,7 +107,7 @@ void CheckRays(Camera *camera, int raysOffestNumber, SDL_Rect walls[], int wallN
             shade = 1.0f - (correctedDist / maxDist);
             if (shade < 0.1f) shade = 0.1f;
             if (shade > 1.0f) shade = 1.0f;
-            Uint8 col = (Uint8)fmaxf(20.0f, 200.0f * shade);
+            Uint8 col = (Uint8)fmaxf(20.0f, 50.0f * shade);
             for (int w = 0; w < width; w++) {
                 SDL_SetRenderDrawColor(renderer3D, col, col, col, 255);
                 SDL_RenderDrawLine(renderer3D, wallX + w, lineOff, wallX + w, lineOff + lineH);
