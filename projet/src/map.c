@@ -4,11 +4,8 @@
 #include <stdio.h>
 
 
-// Grid map: 0 = road, 1 = wall, 2 = token, 3 = tree
-// Small example grid (mapWidth x mapHeight)
-#define MAP_W 20
-#define MAP_H_ 15
-
+// Grid map: 0 = road, 1 = wall, 9 = coffee/token, 3 = tree
+// Arrays are allocated by initMap
 SDL_Rect *walls = NULL;
 SDL_Rect items[10];
 Vector2 itemsPos[10];
@@ -26,18 +23,26 @@ void initMap(int cellSize)
     currentCellSize = cellSize;
 
     // Count walls (cells == 1)
-    int count = 0;
+    int countWalls = 0;
     for (int y = 0; y < MAP_H_; y++) {
         for (int x = 0; x < MAP_W; x++) {
-            if (grid[y][x] == 1) count++;
+            if (grid[y][x] == 1) countWalls++;
         }
     }
 
-    // Allocate walls array
-    walls = (SDL_Rect *)malloc(sizeof(SDL_Rect) * count);
-    if (!walls) {
-        wall_count = 0;
-        return;
+    // Free previous buffers if present
+    if (walls) { free(walls); walls = NULL; }
+
+    // Allocate walls and items arrays
+    if (countWalls > 0) {
+        walls = (SDL_Rect *)malloc(sizeof(SDL_Rect) * countWalls);
+        if (!walls) {
+            wall_count = 0;
+            item_count = 0;
+            return;
+        }
+    } else {
+        walls = NULL;
     }
 
     // Fill walls
@@ -76,6 +81,16 @@ int getMapHeight(void)
 int getMapCellSize(void)
 {
     return currentCellSize;
+}
+
+SDL_Rect *getMapItems(void)
+{
+    return items;
+}
+
+int getMapItemCount(void)
+{
+    return item_count;
 }
 
 void drawMap(SDL_Renderer *renderer, int cellSize)
@@ -123,8 +138,8 @@ void drawWalls(SDL_Renderer *renderer, SDL_Rect *wallsArr, int wall_count)
 }
 
 void freeMap(){
-    free(walls);
-    walls = NULL;
+    if (walls) { free(walls); walls = NULL; }
+    wall_count = 0;
 }
 
 int setMapCell(int x, int y, int value)

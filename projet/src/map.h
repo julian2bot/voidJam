@@ -45,6 +45,10 @@ void drawMap(SDL_Renderer *renderer, int cellSize);
 
 void drawWalls(SDL_Renderer *renderer, SDL_Rect *wallsArr, int wall_count);
 
+/* Items helpers */
+SDL_Rect *getMapItems(void);
+int getMapItemCount(void);
+
 void freeMap();
 
 // Map helpers
