@@ -3,7 +3,7 @@
 
 SDL_Texture* create_cup_texture(SDL_Renderer *renderer)
 {
-    const int W = 32, H = 32;
+    const int W = 8, H = 8;
     SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormat(0, W, H, 32, SDL_PIXELFORMAT_RGBA32);
     if (!surf) return NULL;
 

@@ -120,8 +120,9 @@ State game(Player player, SDL_Renderer *renderer, const Uint8 *keyboard, SDL_Eve
 			case SDL_KEYDOWN:
 				// printf("touche %c\n", event.key.keysym.sym);
 				if (event.key.keysym.sym == SDLK_ESCAPE) fin = 1;
-				if (event.key.keysym.sym == SDLK_UP) gestionFatigue(&player, .5 );
-				if (event.key.keysym.sym == SDLK_DOWN) gestionFatigue(&player, -.5 );
+				// if (event.key.keysym.sym == SDLK_UP) gestionFatigue(&player, .5 );
+				// if (event.key.keysym.sym == SDLK_DOWN) gestionFatigue(&player, -.5 );
+				
 				// Konami code detection
 				if (!player.codeKonami) {
 					SDL_Keycode k = event.key.keysym.sym;
