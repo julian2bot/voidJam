@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 
-
 // Grid map: 0 = road, 1 = wall, 9 = coffee/token, 3 = tree
 // Arrays are allocated by initMap
 SDL_Rect *walls = NULL;

@@ -5,7 +5,7 @@
 
 Player initPlayer(SDL_Renderer *renderer)
 {
-	SDL_Rect position = {100, 100, 30, 20};
+	SDL_Rect position = {3*64, 3*64, 30, 20};
 	SDL_FPoint point = {position.x, position.y};
 	Player player = {point, position, 90, NULL, .4, FATIGUE_MAX, 0, false, 0};
 
@@ -62,7 +62,7 @@ void updatePlayer(Player *player, int turnLeft, int turnRight,
         
         placeRandomItem(indexItemCol);
       
-        gestionFatigue(player,1);
+        gestionFatigue(player,0.5);
 		// gameOver(player);
 		// return;
 	}
